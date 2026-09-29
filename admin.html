@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق الأدمن - لوحة التحكم ومولد المفاتيح</title>
+    <style>
+        * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+        body { margin: 0; padding: 15px; background-color: #1a252f; color: #fff; }
+
+        .admin-card {
+            background: #2c3e50;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            margin: 20px auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 1px solid #34495e;
+        }
+
+        .admin-card h2 {
+            margin-top: 0;
+            color: #f1c40f;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: #ecf0f1; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #34495e;
+            border-radius: 6px;
+            background: #34495e;
+            color: #fff;
+            font-size: 1rem;
+        }
+        .form-group input:focus { outline: none; border-color: #27ae60; }
+
+        button.btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button.btn:hover { background: #219150; }
+        button.btn-purple { background-color: #8e44ad; }
+        button.btn-purple:hover { background-color: #712b8d; }
+        button.btn-danger { background-color: #c0392b; }
+
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #1a252f;
+            border-radius: 6px;
+            border: 1px dashed #27ae60;
+        }
+        .result-box textarea {
+            width: 100%;
+            height: 80px;
+            background: transparent;
+            border: none;
+            color: #2ecc71;
+            font-size: 0.95rem;
+            resize: none;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: #2c3e50; padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; text-align: center; border: 1px solid #34495e;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-card">
+        <h2>لوحة التحكم - مولد المفاتيح</h2>
+
+        <button class="btn btn-purple" onclick="openShareModal()">➕ إضافة عميل جديد (مشاركة رابط التطبيق)</button>
+        <hr style="border-color: #34495e; margin: 20px 0;">
+
+        <div class="form-group">
+            <label>معرّف جهاز العميل (Device ID):</label>
+            <input type="text" id="targetDeviceId" placeholder="مثال: DEV-123456">
+        </div>
+
+        <div class="form-group">
+            <label>اسم السوبر ماركت / المحل:</label>
+            <input type="text" id="storeNameInput" placeholder="أدخل اسم المحل هنا...">
+        </div>
+
+        <div class="form-group">
+            <label>مدة التفعيل (بالأيام):</label>
+            <select id="daysInput">
+                <option value="30">شهر واحد (30 يوم)</option>
+                <option value="90">3 أشهر (90 يوم)</option>
+                <option value="180">6 أشهر (180 يوم)</option>
+                <option value="365">سنة كاملة (365 يوم)</option>
+            </select>
+        </div>
+
+        <button class="btn" onclick="generateKey()">إنشاء كود التفعيل</button>
+
+        <div class="result-box" id="resultBox" style="display: none;">
+            <label style="font-size: 0.85rem; color: #27ae60;">كود التفعيل جاهز للنسخ والإرسال:</label>
+            <textarea id="resultKey" readonly></textarea>
+            <button class="btn" style="background:#2980b9; margin-top:5px;" onclick="copyAndSend()">نسخ وإرسال عبر الواتساب</button>
+        </div>
+    </div>
+
+    <div id="shareModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="margin-top:0; color:#f1c40f;">إرسال رابط التطبيق لعميل جديد</h3>
+            <p style="font-size:0.85rem; color:#ecf0f1;">اختر الوسيلة لإرسال رابط تطبيق المبيعات إلى العميل:</p>
+            
+            <button class="btn" style="background-color:#25d366; margin-bottom:8px;" onclick="shareViaWhatsApp()">
+                💬 إرسال عبر الواتساب
+            </button>
+            
+            <button class="btn" style="background-color:#0084ff; margin-bottom:8px;" onclick="shareViaMessenger()">
+                ⚡ إرسال عبر الماسنجر
+            </button>
+            
+            <button class="btn" style="background-color:#ea4335; margin-bottom:8px;" onclick="shareViaEmail()">
+                ✉️ إرسال عبر البريد الإلكتروني
+            </button>
+            
+            <button class="btn btn-danger" style="margin-top:10px;" onclick="closeShareModal()">إلغاء</button>
+        </div>
+    </div>
+
+    <script>
+        function getClientAppUrl() {
+            let currentUrl = window.location.href;
+            if (currentUrl.includes('admin.html')) {
+                return currentUrl.replace('admin.html', 'index.html');
+            } else {
+                return currentUrl.substring(0, currentUrl.lastIndexOf('/')) + '/index.html';
+            }
+        }
+
+        function generateKey() {
+            const deviceID = document.getElementById('targetDeviceId').value.trim();
+            const storeName = document.getElementById('storeNameInput').value.trim();
+            const days = document.getElementById('daysInput').value;
+
+            if (!deviceID || !storeName) {
+                alert('يرجى إدخال معرّف الجهاز واسم المحل أولاً!');
+                return;
+            }
+
+            const rawData = `${deviceID}_${storeName}_${days}`;
+            const encodedKey = btoa(encodeURIComponent(rawData));
+
+            document.getElementById('resultKey').value = encodedKey;
+            document.getElementById('resultBox').style.display = 'block';
+        }
+
+        function copyAndSend() {
+            const key = document.getElementById('resultKey').value;
+            const storeName = document.getElementById('storeNameInput').value;
+            const days = document.getElementById('daysInput').value;
+
+            const textMessage = `مرحباً بك، كود تفعيل تطبيق المبيعات الخاص بك (*${storeName}*) لمدة ${days} يوم جاهز.\n\nكود التفعيل:\n${key}\n\nيرجى نسخ الكود ولصقه داخل التطبيق في خانة التفعيل.`;
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(textMessage)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        function openShareModal() {
+            const appClientLink = getClientAppUrl();
+            if (navigator.share) {
+                navigator.share({
+                    title: 'تطبيق المبيعات والحسابات',
+                    text: 'تفضل برابط استخدام تطبيق إدارة المبيعات والحسابات:',
+                    url: appClientLink
+                }).catch(() => {});
+            } else {
+                document.getElementById('shareModal').style.display = 'flex';
+            }
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModal').style.display = 'none';
+        }
+
+        function shareViaWhatsApp() {
+            const appClientLink = getClientAppUrl();
+            const message = `مرحباً بك! يمكنك استخدام تطبيق إدارة المبيعات والحسابات عبر الرابط التالي:\n${appClientLink}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+            closeShareModal();
+        }
+
+        function shareViaMessenger() {
+            const appClientLink = getClientAppUrl();
+            window.open(`https://www.facebook.com/dialog/share?app_id=87741124305&href=${encodeURIComponent(appClientLink)}&display=popup`, '_blank');
+            closeShareModal();
+        }
+
+        function shareViaEmail() {
+            const appClientLink = getClientAppUrl();
+            const subject = "دعوة لاستخدام تطبيق المبيعات والحسابات";
+            const body = `مرحباً بك،\n\nيشرفنا دعوتك لاستخدام تطبيق إدارة المبيعات والحسابات.\nيمكنك فتح التطبيق مباشرة عبر الرابط التالي:\n${appClientLink}`;
+            window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+            closeShareModal();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق المبيعات والحسابات</title>
+    
+    <!-- ربط ملف التثبيت المباشر للهاتف PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <style>
+        * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+        body { margin: 0; padding: 15px; background-color: #1a252f; color: #fff; }
+
+        .app-card {
+            background: #2c3e50;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 500px;
+            margin: 15px auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            border: 1px solid #34495e;
+            text-align: center;
+        }
+
+        h1 { color: #f1c40f; font-size: 1.4rem; margin-top: 0; }
+        p { color: #ecf0f1; font-size: 0.95rem; line-height: 1.5; }
+
+        .device-info {
+            background: #1a252f;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px dashed #34495e;
+            margin: 15px 0;
+            word-break: break-all;
+        }
+
+        .device-id-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #e74c3c;
+            letter-spacing: 1px;
+        }
+
+        .form-group { margin-bottom: 15px; text-align: right; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: #bdc3c7; }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #34495e;
+            border-radius: 6px;
+            background: #34495e;
+            color: #fff;
+            font-size: 0.95rem;
+            direction: ltr;
+        }
+
+        .btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn:hover { background: #219150; }
+        .btn-install { background: #f39c12; display: none; margin-bottom: 15px; }
+
+        .status-active { color: #2ecc71; font-weight: bold; }
+        .status-expired { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="app-card">
+        <!-- زر التثبيت الظاهر للعميل -->
+        <button id="installBtn" class="btn btn-install" onclick="installApp()">📲 اضغط هنا لتثبيت التطبيق على شاشة الموبايل</button>
+
+        <h1>🛒 تطبيق المبيعات والحسابات</h1>
+
+        <div id="activationSection">
+            <p>مرحباً بك! لاستخدام التطبيق يرجى تزويد المسؤول بمعرّف جهازك أدناه للحصول على كود التفعيل:</p>
+            
+            <div class="device-info">
+                <span>معرّف الجهاز الخاص بك:</span><br>
+                <span class="device-id-text" id="displayDeviceId">جاري التحميل...</span>
+            </div>
+
+            <div class="form-group">
+                <label>أدخل كود التفعيل المستلم من الأدمن:</label>
+                <input type="text" id="activationCodeInput" placeholder="أدخل الكود هنا...">
+            </div>
+
+            <button class="btn" onclick="activateApp()">تفعيل التطبيق الان</button>
+        </div>
+
+        <div id="activeSection" style="display: none;">
+            <p class="status-active">✅ التطبيق مفعل وجاهز للعمل!</p>
+            <h3 id="storeNameHeader" style="color: #2ecc71;"></h3>
+            <p id="expiryInfoText"></p>
+            <hr style="border-color: #34495e;">
+            <p style="font-size:0.85rem; color:#888;">(هنا ستكون شاشة المبيعات والكاشير الرئيسية)</p>
+        </div>
+    </div>
+
+    <script>
+        // توليد معرّف فريد للجهاز وحفظه
+        function getOrCreateDeviceId() {
+            let devId = localStorage.getItem('app_device_id');
+            if (!devId) {
+                devId = 'DEV-' + Math.floor(100000 + Math.random() * 900000);
+                localStorage.setItem('app_device_id', devId);
+            }
+            return devId;
+        }
+
+        const currentDeviceId = getOrCreateDeviceId();
+        document.getElementById('displayDeviceId').innerText = currentDeviceId;
+
+        // التحقق من حالة التفعيل
+        function checkActivation() {
+            const licenseData = localStorage.getItem('app_license');
+            if (licenseData) {
+                try {
+                    const data = JSON.parse(licenseData);
+                    const now = new Date().getTime();
+                    if (now < data.expiryDate && data.deviceId === currentDeviceId) {
+                        document.getElementById('activationSection').style.display = 'none';
+                        document.getElementById('activeSection').style.display = 'block';
+                        document.getElementById('storeNameHeader').innerText = data.storeName;
+                        
+                        const daysLeft = Math.ceil((data.expiryDate - now) / (1000 * 60 * 60 * 24));
+                        document.getElementById('expiryInfoText').innerText = `باقي على انتهاء الاشتراك: ${daysLeft} يوم`;
+                        return;
+                    }
+                } catch(e) {}
+            }
+            document.getElementById('activationSection').style.display = 'block';
+            document.getElementById('activeSection').style.display = 'none';
+        }
+
+        function activateApp() {
+            const code = document.getElementById('activationCodeInput').value.trim();
+            if (!code) {
+                alert('يرجى أدخال كود التفعيل أولاً!');
+                return;
+            }
+
+            try {
+                const decoded = decodeURIComponent(atob(code));
+                const parts = decoded.split('_'); // DEV-ID_StoreName_Days
+                if (parts.length === 3) {
+                    const [devId, storeName, days] = parts;
+                    if (devId === currentDeviceId) {
+                        const expiry = new Date().getTime() + (parseInt(days) * 24 * 60 * 60 * 1000);
+                        const licenseObj = {
+                            deviceId: devId,
+                            storeName: storeName,
+                            expiryDate: expiry
+                        };
+                        localStorage.setItem('app_license', JSON.stringify(licenseObj));
+                        alert('تم تفعيل التطبيق بنجاح!');
+                        checkActivation();
+                    } else {
+                        alert('كود التفعيل هذا غير مخصص لهذا الجهاز!');
+                    }
+                } else {
+                    alert('كود التفعيل غير صحيح!');
+                }
+            } catch(e) {
+                alert('كود التفعيل غير صالح!');
+            }
+        }
+
+        // البرمجة الخاصة بتثبيت التطبيق على الشاشة الرئيسية (PWA)
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBtn').style.display = 'block';
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        document.getElementById('installBtn').style.display = 'none';
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        checkActivation();
+    </script>
+</body>
+</html>
