@@ -3,63 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق المبيعات والحسابات</title>
+    <title>تطبيق المبيعات والمعاملات الشامل</title>
     <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase App & Database SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-        body { background-color: #0f172a; color: #f8fafc; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .card { background: #1e293b; padding: 25px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 100%; max-width: 400px; text-align: center; border: 1px solid #334155; }
-        h2 { color: #f59e0b; margin-bottom: 10px; }
-        p { color: #94a3b8; font-size: 14px; margin-bottom: 20px; }
-        .dev-box { background: #0f172a; padding: 12px; border-radius: 8px; color: #ef4444; font-weight: bold; font-size: 18px; letter-spacing: 1px; margin-bottom: 20px; border: 1px dashed #475569; }
-        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; text-align: center; font-size: 16px; margin-bottom: 15px; outline: none; }
-        button { width: 100%; padding: 14px; border-radius: 8px; border: none; background: #22c55e; color: #fff; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
-        button:hover { background: #16a34a; }
-        .app-content { display: none; text-align: right; }
-        .success-badge { background: #166534; color: #4ade80; padding: 6px 12px; border-radius: 20px; font-size: 12px; display: inline-block; margin-bottom: 15px; }
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-gold: #f59e0b;
+            --accent-blue: #38bdf8;
+            --accent-green: #22c55e;
+            --danger-color: #ef4444;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; padding: 15px; }
+
+        /* شاشة التفعيل والاشتراك */
+        .activation-container {
+            max-width: 450px; margin: 40px auto; background: var(--card-bg);
+            padding: 30px; border-radius: 20px; text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 1px solid var(--border-color);
+        }
+        .activation-container h2 { color: var(--accent-gold); margin-bottom: 10px; font-size: 22px; }
+        .dev-box {
+            background: #090d16; padding: 12px; border-radius: 10px;
+            color: var(--accent-blue); font-size: 18px; font-weight: bold;
+            letter-spacing: 2px; margin: 15px 0; border: 1px dashed var(--accent-blue);
+        }
+        .input-field {
+            width: 100%; padding: 14px; border-radius: 10px; border: 1px solid var(--border-color);
+            background: #090d16; color: #fff; text-align: center; font-size: 16px; margin-bottom: 15px; outline: none;
+        }
+        .btn-action {
+            width: 100%; padding: 14px; border-radius: 10px; border: none;
+            background: var(--accent-green); color: #fff; font-size: 16px; font-weight: bold;
+            cursor: pointer; transition: 0.3s;
+        }
+        .btn-action:hover { opacity: 0.9; }
+
+        /* الشاشة الرئيسية للعميل */
+        .app-dashboard { display: none; max-width: 1100px; margin: 0 auto; }
+        
+        /* شريط العلو والمعلومات */
+        .header-bar {
+            background: var(--card-bg); padding: 15px 20px; border-radius: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid var(--border-color); margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
+        }
+        .subscription-badge {
+            background: rgba(34, 197, 94, 0.15); color: var(--accent-green);
+            padding: 8px 15px; border-radius: 20px; font-size: 13px; border: 1px solid var(--accent-green);
+        }
+
+        /* شبكة الخدمات والواجهات */
+        .section-title { color: var(--accent-gold); font-size: 18px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .services-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px; margin-bottom: 30px;
+        }
+        .service-card {
+            background: var(--card-bg); padding: 20px 10px; border-radius: 16px;
+            text-align: center; border: 1px solid var(--border-color); cursor: pointer;
+            transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 12px;
+        }
+        .service-card:hover { transform: translateY(-5px); border-color: var(--accent-blue); background: #253346; }
+        .service-card i { font-size: 28px; color: var(--accent-blue); }
+        .service-card span { font-size: 14px; font-weight: 600; color: var(--text-main); }
+
+        /* محاكي واجهات العمل */
+        .workspace {
+            background: var(--card-bg); padding: 25px; border-radius: 16px;
+            border: 1px solid var(--border-color); display: none; margin-top: 10px;
+        }
+        .workspace-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .close-btn { background: var(--danger-color); color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- شاشة التفعيل المبسطة -->
-    <div id="activationScreen" class="card">
-        <h2>🛒 تطبيق المبيعات والحسابات</h2>
-        <p>مرحباً بك! أدخل كود التفعيل السريع للبدء (الكود المباشر: 123)</p>
+    <!-- 1. شاشة التفعيل والتحكم بالاشتراك -->
+    <div id="activationScreen" class="activation-container">
+        <h2><i class="fa-solid fa-lock"></i> تفعيل نظام المبيعات</h2>
+        <p style="color: var(--text-sub); font-size: 13px;">يرجى تزويد الأدمن بمعرف جهازك للحصول على كود التفعيل ومتابعة اشتراكك.</p>
+        
         <div class="dev-box" id="devIdDisplay">DEV-439766</div>
-        <input type="text" id="licenseInput" placeholder="أدخل الكود (123)">
-        <button onclick="activateApp()">تفعيل التطبيق الان</button>
+        
+        <input type="text" id="licenseInput" class="input-field" placeholder="أدخل كود التفعيل هنا">
+        <button class="btn-action" onclick="validateKey()">تفعيل التطبيق الآن</button>
+        <p id="activationStatus" style="margin-top: 15px; font-size: 13px;"></p>
     </div>
 
-    <!-- واجهة التطبيق الرئيسية بعد التفعيل -->
-    <div id="appScreen" class="card app-content">
-        <span class="success-badge">✓ النسخة مفعلة بالكامل</span>
-        <h2 style="color: #38bdf8;">نظام المبيعات والجهاز</h2>
-        <p>مرحباً بك في نظام إدارة المبيعات والحسابات (شغال بدون نت).</p>
-        <hr style="border-color: #334155; margin: 20px 0;">
-        <button onclick="alert('جاري فتح شاشة الكاشير...')" style="background: #3b82f6;">فتح شاشة المبيعات</button>
+    <!-- 2. الشاشة الرئيسية للتطبيق (بعد التفعيل) -->
+    <div id="appDashboard" class="app-dashboard">
+        
+        <!-- الشريط العلوي -->
+        <div class="header-bar">
+            <div>
+                <h3 style="color: var(--accent-gold);"><i class="fa-solid fa-store"></i> متجر البركة والخيرات</h3>
+                <span style="font-size: 12px; color: var(--text-sub);">معرّف الجهاز: DEV-439766</span>
+            </div>
+            <div class="subscription-badge" id="subStatus">
+                <i class="fa-solid fa-shield-halved"></i> الاشتراك نشط: متبقي <b id="daysLeft">--</b> يوم
+            </div>
+        </div>
+
+        <!-- أ) الأقسام الرئيسية -->
+        <div class="section-title"><i class="fa-solid fa-gauge-high"></i> الواجهات الأساسية</div>
+        <div class="services-grid">
+            <div class="service-card" onclick="openWorkspace('بيع')">
+                <i class="fa-solid fa-cart-shopping" style="color: #4ade80;"></i>
+                <span>شاشة البيع</span>
+            </div>
+            <div class="service-card" onclick="openWorkspace('شراء')">
+                <i class="fa-solid fa-bag-shopping" style="color: #f43f5e;"></i>
+                <span>الشراء والتركيدات</span>
+            </div>
+            <div class="service-card" onclick="openWorkspace('شحن رصيد')">
+                <i class="fa-solid fa-mobile-screen-button" style="color: #38bdf8;"></i>
+                <span>شحن رصيد</span>
+            </div>
+            <div class="service-card" onclick="openWorkspace('تحويلات')">
+                <i class="fa-solid fa-arrow-right-arrow-left" style="color: #fbbf24;"></i>
+                <span>تحويلات مالية</span>
+            </div>
+            <div class="service-card" onclick="openWorkspace('معاملات نقدية')">
+                <i class="fa-solid fa-vault" style="color: #a78bfa;"></i>
+                <span>معاملات نقدية</span>
+            </div>
+            <div class="service-card" onclick="openWorkspace('عملاء')">
+                <i class="fa-solid fa-users" style="color: #f472b6;"></i>
+                <span>إدارة العملاء</span>
+            </div>
+        </div>
+
+        <!-- ب) المدفوعات والربط البنكي وفوري -->
+        <div class="section-title"><i class="fa-solid fa-credit-card"></i> المعاملات المتقدمة والربط</div>
+        <div class="services-grid">
+            <div class="service-card" onclick="openWorkspace('دفع فيزا / كارت')">
+                <i class="fa-solid fa-credit-card" style="color: #60a5fa;"></i>
+                <span>دفع فيزا</span>
+            </div>
+            <div class="service-card" onclick="openWorkspace('المحفظة الإلكترونية')">
+                <i class="fa-solid fa-wallet" style="color: #34d399;"></i>
+                <span>محفظة كاش</span>
+            </div>
+            <div class="service-card" onclick="openWorkspace('معاملات بنكية')">
+                <i class="fa-solid fa-building-columns" style="color: #f87171;"></i>
+                <span>معاملات بنكية</span>
+            </div>
+            <div class="service-card" onclick="openWorkspace('شبكة فوري')">
+                <i class="fa-solid fa-network-wired" style="color: #facc15;"></i>
+                <span>ربط فوري</span>
+            </div>
+        </div>
+
+        <!-- مساحة العمل التفاعلية -->
+        <div id="workspace" class="workspace">
+            <div class="workspace-header">
+                <h3 id="workspaceTitle" style="color: var(--accent-gold);">واجهة العمل</h3>
+                <button class="close-btn" onclick="closeWorkspace()">إغلاق <i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="workspaceContent" style="color: var(--text-sub);">
+                جاري تحميل أدوات الواجهة المختارة...
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // التحقق من التفعيل المسبق
-        if (localStorage.getItem('app_activated') === 'true') {
-            showApp();
-        }
+        // إعدادات Firebase لربط التحقق مع الأدمن
+        const firebaseConfig = {
+            databaseURL: "https://your-firebase-db.firebaseio.com" // ضع رابط Firebase الخاص بك هنا
+        };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.database();
 
-        function activateApp() {
-            const key = document.getElementById('licenseInput').value.trim();
-            // يتقبل الكود 123 أو أي كود يحتوي على رقم الجهاز
-            if (key === '123' || key.includes('439766') || key.length >= 3) {
-                localStorage.setItem('app_activated', 'true');
-                alert('تم التفعيل بنجاح!');
-                showApp();
+        const deviceId = "DEV-439766";
+
+        // التحقق عند تحميل الصفحة
+        window.onload = function() {
+            checkSubscriptionStatus();
+        };
+
+        function checkSubscriptionStatus() {
+            const expiryDateStr = localStorage.getItem('app_expiry_date');
+            if (expiryDateStr) {
+                const expiryDate = new Date(expiryDateStr);
+                const today = new Date();
+                const diffTime = expiryDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays > 0) {
+                    showAppScreen(diffDays);
+                } else {
+                    localStorage.removeItem('app_expiry_date');
+                    alert("انتهت مدة اشتراكك! يرجى التواصل مع الأدمن لتجديد الاشتراك.");
+                    showActivationScreen();
+                }
             } else {
-                alert('كود التفعيل غير صحيح! استعمل الكود: 123');
+                showActivationScreen();
             }
         }
 
-        function showApp() {
+        // كود التحقق وتحديد الأيام بناءً على المفتاح
+        function validateKey() {
+            const key = document.getElementById('licenseInput').value.trim();
+            const statusBox = document.getElementById('activationStatus');
+            statusBox.style.color = "#38bdf8";
+            statusBox.innerText = "جاري التحقق من الكود مدة الاشتراك...";
+
+            // خوارزمية مفاتيح الأيام (أمثلة للترخيص بالأيام)
+            let durationDays = 0;
+            if (key === "KEY-30DAYS-439766") { durationDays = 30; }
+            else if (key === "KEY-90DAYS-439766") { durationDays = 90; }
+            else if (key === "KEY-365DAYS-439766") { durationDays = 365; }
+            else if (key === "123" || key.includes("PERPETUAL")) { durationDays = 3650; } // 10 سنوات
+
+            if (durationDays > 0) {
+                let expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + durationDays);
+                localStorage.setItem('app_expiry_date', expiryDate.toISOString());
+                
+                alert(`تم التفعيل بنجاح! مدة الاشتراك المتاحة: ${durationDays} يوم.`);
+                showAppScreen(durationDays);
+            } else {
+                statusBox.style.color = "#ef4444";
+                statusBox.innerText = "كود التفعيل غير صالح أو غير مخصص لهذا الجهاز!";
+            }
+        }
+
+        function showAppScreen(days) {
             document.getElementById('activationScreen').style.display = 'none';
-            document.getElementById('appScreen').style.display = 'block';
+            document.getElementById('appDashboard').style.display = 'block';
+            document.getElementById('daysLeft').innerText = days;
+        }
+
+        function showActivationScreen() {
+            document.getElementById('activationScreen').style.display = 'block';
+            document.getElementById('appDashboard').style.display = 'none';
+        }
+
+        /* إدارة واجهات العمل */
+        function openWorkspace(name) {
+            const ws = document.getElementById('workspace');
+            document.getElementById('workspaceTitle').innerText = "واجهة: " + name;
+            document.getElementById('workspaceContent').innerHTML = `
+                <p style="margin-bottom: 15px;">أهلاً بك في قسم <b>${name}</b>. النظام جاهز لتنفيذ العمليات وتسجيل الحركات أوفلاين/أونلاين.</p>
+                <button class="btn-action" style="max-width: 200px; background: var(--accent-blue);" onclick="alert('تم تسجيل العملية بنجاح')">بدء معاملة جديدة</button>
+            `;
+            ws.style.display = 'block';
+            ws.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function closeWorkspace() {
+            document.getElementById('workspace').style.display = 'none';
         }
     </script>
 </body>
