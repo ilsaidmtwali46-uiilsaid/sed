@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام المبيعات والجرد الشامل</title>
+    <title>نظام إدارة المبيعات والحسابات الشامل</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -54,10 +54,10 @@
             padding: 6px 12px; border-radius: 20px; font-size: 12px; border: 1px solid var(--accent-green);
         }
 
-        .section-title { color: var(--accent-gold); font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .section-title { color: var(--accent-gold); font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-right: 3px solid var(--accent-gold); padding-right: 8px; }
         .services-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 12px; margin-bottom: 20px;
+            gap: 12px; margin-bottom: 25px;
         }
         .service-card {
             background: var(--card-bg); padding: 15px 10px; border-radius: 14px;
@@ -92,67 +92,78 @@
         <p id="activationStatus" style="margin-top: 15px; font-size: 13px;"></p>
     </div>
 
-    <!-- الشاشة الرئيسية -->
+    <!-- الشاشة الرئيسية المحدثة محاسبياً -->
     <div id="appDashboard" class="app-dashboard">
         <div class="header-bar">
             <div>
-                <h3 style="color: var(--accent-gold);"><i class="fa-solid fa-store"></i> متجر البركة والخيرات</h3>
-                <span style="font-size: 12px; color: var(--text-sub);">DEV-439766</span>
+                <h3 style="color: var(--accent-gold);"><i class="fa-solid fa-calculator"></i> النظام المحاسبي الشامل</h3>
+                <span style="font-size: 12px; color: var(--text-sub);">معرف الجهاز: DEV-439766</span>
             </div>
             <div class="subscription-badge">
                 <i class="fa-solid fa-shield-halved"></i> متبقي <b id="daysLeft">--</b> يوم
             </div>
         </div>
 
-        <div class="section-title"><i class="fa-solid fa-gauge-high"></i> الواجهات الأساسية</div>
+        <!-- 1. المبيعات والمشتريات -->
+        <div class="section-title"><i class="fa-solid fa-cart-flatbed"></i> الحركة التجارية (البيع والشراء)</div>
         <div class="services-grid">
-            <div class="service-card" onclick="openWorkspace('بيع')">
-                <i class="fa-solid fa-cart-shopping" style="color: #4ade80;"></i>
-                <span>شاشة البيع</span>
+            <div class="service-card" onclick="openWorkspace('مبيعات')">
+                <i class="fa-solid fa-cash-register" style="color: #4ade80;"></i>
+                <span>فاتورة مبيعات</span>
             </div>
+            <div class="service-card" onclick="openWorkspace('مرتجع_مبيعات')">
+                <i class="fa-solid fa-rotate-left" style="color: #f87171;"></i>
+                <span>مرتجع مبيعات</span>
+            </div>
+            <div class="service-card" onclick="openWorkspace('مشتريات')">
+                <i class="fa-solid fa-truck-ramp-box" style="color: #38bdf8;"></i>
+                <span>فاتورة مشتريات</span>
+            </div>
+            <div class="service-card" onclick="openWorkspace('مرتجع_مشتريات')">
+                <i class="fa-solid fa-truck-arrow-right" style="color: #fbbf24;"></i>
+                <span>مرتجع مشتريات</span>
+            </div>
+        </div>
+
+        <!-- 2. المخزون والجرد -->
+        <div class="section-title"><i class="fa-solid fa-boxes-stacked"></i> إدارة المخزن والتسويات</div>
+        <div class="services-grid">
             <div class="service-card" onclick="openWorkspace('جرد')">
-                <i class="fa-solid fa-boxes-stacked" style="color: #38bdf8;"></i>
-                <span>المخزن والجرد</span>
+                <i class="fa-solid fa-clipboard-list" style="color: #a78bfa;"></i>
+                <span>جرد المخزون</span>
             </div>
-            <div class="service-card" onclick="openWorkspace('شراء')">
-                <i class="fa-solid fa-bag-shopping" style="color: #f43f5e;"></i>
-                <span>الشراء والتركيدات</span>
+            <div class="service-card" onclick="openWorkspace('إضافة_صنف')">
+                <i class="fa-solid fa-square-plus" style="color: #34d399;"></i>
+                <span>تكويد أصناف</span>
             </div>
-            <div class="service-card" onclick="openWorkspace('شحن')">
-                <i class="fa-solid fa-mobile-screen-button" style="color: #fbbf24;"></i>
-                <span>شحن رصيد</span>
+            <div class="service-card" onclick="openWorkspace('تسوية')">
+                <i class="fa-solid fa-scale-balanced" style="color: #f472b6;"></i>
+                <span>تسوية مخزنية</span>
+            </div>
+        </div>
+
+        <!-- 3. الحسابات والمالية -->
+        <div class="section-title"><i class="fa-solid fa-vault"></i> الخزينة والشركاء (العملاء والموردين)</div>
+        <div class="services-grid">
+            <div class="service-card" onclick="openWorkspace('الخزينة')">
+                <i class="fa-solid fa-building-columns" style="color: #facc15;"></i>
+                <span>حركة الخزينة والنقدية</span>
             </div>
             <div class="service-card" onclick="openWorkspace('عملاء')">
-                <i class="fa-solid fa-users" style="color: #f472b6;"></i>
-                <span>إدارة العملاء</span>
+                <i class="fa-solid fa-users-gear" style="color: #60a5fa;"></i>
+                <span>حسابات العملاء (آجل)</span>
             </div>
-            <div class="service-card" onclick="openWorkspace('نقدية')">
-                <i class="fa-solid fa-vault" style="color: #a78bfa;"></i>
-                <span>معاملات نقدية</span>
+            <div class="service-card" onclick="openWorkspace('موردين')">
+                <i class="fa-solid fa-handshake" style="color: #fb7185;"></i>
+                <span>حسابات الموردين</span>
             </div>
-        </div>
-
-        <div class="section-title"><i class="fa-solid fa-credit-card"></i> المعاملات المتقدمة والربط</div>
-        <div class="services-grid">
-            <div class="service-card" onclick="openWorkspace('فيزا')">
-                <i class="fa-solid fa-credit-card" style="color: #60a5fa;"></i>
-                <span>دفع فيزا</span>
-            </div>
-            <div class="service-card" onclick="openWorkspace('محفظة')">
-                <i class="fa-solid fa-wallet" style="color: #34d399;"></i>
-                <span>محفظة كاش</span>
-            </div>
-            <div class="service-card" onclick="openWorkspace('بنك')">
-                <i class="fa-solid fa-building-columns" style="color: #f87171;"></i>
-                <span>معاملات بنكية</span>
-            </div>
-            <div class="service-card" onclick="openWorkspace('فوري')">
-                <i class="fa-solid fa-network-wired" style="color: #facc15;"></i>
-                <span>شبكة فوري</span>
+            <div class="service-card" onclick="openWorkspace('خدمات_شحن')">
+                <i class="fa-solid fa-mobile-retro" style="color: #22d3ee;"></i>
+                <span>خدمات شحن وفوري</span>
             </div>
         </div>
 
-        <!-- منطقة إدخال وتجربة البيانات الحقيقية -->
+        <!-- منطقة العمليات الحقيقية -->
         <div id="workspace" class="workspace">
             <div class="workspace-header">
                 <h3 id="workspaceTitle" style="color: var(--accent-gold);">عنوان الواجهة</h3>
@@ -164,11 +175,13 @@
 
     <script>
         let inventory = JSON.parse(localStorage.getItem('app_inventory')) || [
-            { id: 101, name: "منتج تجريبي 1", price: 50, qty: 20 },
-            { id: 102, name: "منتج تجريبي 2", price: 120, qty: 8 }
+            { id: 101, name: "صنف تجريبي 1", price: 50, buyPrice: 35, qty: 20 },
+            { id: 102, name: "صنف تجريبي 2", price: 120, buyPrice: 90, qty: 8 }
         ];
 
-        let salesHistory = JSON.parse(localStorage.getItem('app_sales')) || [];
+        let customers = JSON.parse(localStorage.getItem('app_customers')) || [];
+        let vendors = JSON.parse(localStorage.getItem('app_vendors')) || [];
+        let treasury = JSON.parse(localStorage.getItem('app_treasury')) || 1000; // رصيد بداية الخزينة
 
         window.onload = function() { checkSubscriptionStatus(); };
 
@@ -219,90 +232,135 @@
             ws.style.display = 'block';
             ws.scrollIntoView({ behavior: 'smooth' });
 
-            if (type === 'بيع') {
-                title.innerText = "🛒 شاشة إدخال المبيعات";
+            if (type === 'مبيعات') {
+                title.innerText = "🧾 فاتورة مبيعات جديدة";
                 body.innerHTML = `
                     <label>اختر المنتج:</label>
                     <select id="sellProdSelect">
-                        ${inventory.map(i => `<option value="${i.id}">${i.name} - المتبقي: (${i.qty}) - السعر: ${i.price} ج.م</option>`).join('')}
+                        ${inventory.map(i => `<option value="${i.id}">${i.name} - المتاح: (${i.qty}) - السعر: ${i.price} ج.م</option>`).join('')}
                     </select>
-                    <label>الكمية المباعة:</label>
+                    <label>طريقة الدفع:</label>
+                    <select id="payMethod">
+                        <option value="cash">نقدي (كاش)</option>
+                        <option value="credit">آجل (على الحساب)</option>
+                        <option value="visa">فيزا / كارت</option>
+                    </select>
+                    <label>الكمية:</label>
                     <input type="number" id="sellQty" class="input-field" value="1">
-                    <button class="btn-action" onclick="executeSale()">إتمام البيع واستخراج الفاتورة</button>
-                    
-                    <h4 style="color: var(--accent-gold); margin-top: 15px;">سجل المبيعات الأخيرة</h4>
-                    <table>
-                        <tr><th>المنتج</th><th>الكمية</th><th>الإجمالي</th></tr>
-                        ${salesHistory.map(s => `<tr><td>${s.name}</td><td>${s.qty}</td><td>${s.total} ج.م</td></tr>`).join('')}
-                    </table>
+                    <button class="btn-action" onclick="executeSale()">حفظ الفاتورة وتحديث الخزينة</button>
+                `;
+            } else if (type === 'مشتريات') {
+                title.innerText = "📥 فاتورة مشتريات (وارد للمخزن)";
+                body.innerHTML = `
+                    <input type="text" id="buyVendor" class="input-field" placeholder="اسم المورد">
+                    <input type="text" id="buyItem" class="input-field" placeholder="اسم الصنف">
+                    <input type="number" id="buyPrice" class="input-field" placeholder="سعر الشراء للصنف">
+                    <input type="number" id="buyQty" class="input-field" placeholder="الكمية الواردة">
+                    <button class="btn-action" style="background: var(--accent-blue);" onclick="executeBuy()">تسجيل المشتريات والخصم من الخزينة</button>
                 `;
             } else if (type === 'جرد') {
-                title.innerText = "📦 إدارة الجرد والمنتجات";
+                title.innerText = "📦 جدول جرد المخزون والربحية";
                 body.innerHTML = `
-                    <h4 style="color: var(--accent-blue); margin-bottom: 8px;">إضافة صنف جديد للمخزن</h4>
-                    <input type="text" id="newProdName" class="input-field" placeholder="اسم المنتج">
-                    <input type="number" id="newProdPrice" class="input-field" placeholder="سعر البيع">
-                    <input type="number" id="newProdQty" class="input-field" placeholder="الكمية الأولى">
-                    <button class="btn-action" style="background: var(--accent-blue);" onclick="addProduct()">حفظ المنتج في الجرد</button>
-                    
-                    <h4 style="color: var(--accent-gold); margin: 15px 0 8px;">جدول جرد المخزن الحالي</h4>
                     <table>
-                        <tr><th>الكود</th><th>المنتج</th><th>الكمية</th><th>السعر</th></tr>
-                        ${inventory.map(i => `<tr><td>${i.id}</td><td>${i.name}</td><td>${i.qty}</td><td>${i.price} ج.م</td></tr>`).join('')}
+                        <tr><th>الكود</th><th>الصنف</th><th>الكمية</th><th>تكلفة الشراء</th><th>سعر البيع</th></tr>
+                        ${inventory.map(i => `<tr><td>${i.id}</td><td>${i.name}</td><td>${i.qty}</td><td>${i.buyPrice \vert{}\vert{} 0} ج.م</td><td>${i.price} ج.م</td></tr>`).join('')}
                     </table>
                 `;
-            } else {
-                title.innerText = "⚡ قسم: " + type;
+            } else if (type === 'إضافة_صنف') {
+                title.innerText = "➕ تكويد صنف جديد في النظام";
                 body.innerHTML = `
-                    <p style="margin-bottom: 10px;">إدخال حركة جديدة في قسم <b>${type}</b>:</p>
-                    <input type="text" id="actionName" class="input-field" placeholder="اسم العميل / الجهة / المورد">
-                    <input type="number" id="actionAmount" class="input-field" placeholder="المبلغ">
-                    <textarea id="actionNote" class="input-field" placeholder="ملاحظات تفصيلية"></textarea>
-                    <button class="btn-action" onclick="saveGeneralAction('${type}')">حفظ وإثبات العملية</button>
+                    <input type="text" id="newProdName" class="input-field" placeholder="اسم الصنف الجديد">
+                    <input type="number" id="newBuyPrice" class="input-field" placeholder="سعر الشراء (التكلفة)">
+                    <input type="number" id="newSellPrice" class="input-field" placeholder="سعر البيع للجمهور">
+                    <input type="number" id="newProdQty" class="input-field" placeholder="الرصيد الافتتاحي">
+                    <button class="btn-action" onclick="addProduct()">حفظ الصنف في قاعدة البيانات</button>
                 `;
+            } else if (type === 'الخزينة') {
+                title.innerText = "💰 حركة الخزينة والنقدية";
+                body.innerHTML = `
+                    <div style="background: #090d16; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: center;">
+                        <span style="color: var(--text-sub);">الرصيد الحالي بالخزينة:</span>
+                        <h2 style="color: var(--accent-green);">${treasury} ج.م</h2>
+                    </div>
+                    <label>نوع الحركة:</label>
+                    <select id="treasuryType">
+                        <option value="in">إيداع / مقبوضات (+)</option>
+                        <option value="out">مصروفات / مسحوبات (-)</option>
+                    </select>
+                    <input type="number" id="treasuryAmount" class="input-field" placeholder="المبلغ">
+                    <input type="text" id="treasuryNote" class="input-field" placeholder="البيان / السبب">
+                    <button class="btn-action" onclick="updateTreasury()">تسجيل الحركة المباشرة</button>
+                `;
+            } else {
+                title.innerText = "⚙️ واجهة: " + type;
+                body.innerHTML = `<p style="color: var(--text-sub);">الواجهة جاهزة لمعالجة حركات <b>${type}</b> وفق القواعد المحاسبية.</p>`;
             }
         }
 
         function addProduct() {
             const name = document.getElementById('newProdName').value;
-            const price = parseFloat(document.getElementById('newProdPrice').value);
+            const buyPrice = parseFloat(document.getElementById('newBuyPrice').value);
+            const price = parseFloat(document.getElementById('newSellPrice').value);
             const qty = parseInt(document.getElementById('newProdQty').value);
 
             if (name && price && qty) {
-                inventory.push({ id: Math.floor(100 + Math.random() * 900), name, price, qty });
+                inventory.push({ id: Math.floor(100 + Math.random() * 900), name, buyPrice, price, qty });
                 localStorage.setItem('app_inventory', JSON.stringify(inventory));
-                alert("تم إضافة المنتج للمخزن بنجاح!");
+                alert("تم تكويد الصنف بنجاح!");
                 openWorkspace('جرد');
-            } else { alert("يرجى إدخال جميع الحقول بشكل صحيح!"); }
+            } else { alert("يرجى ملء كافة البيانات!"); }
         }
 
         function executeSale() {
             const prodId = parseInt(document.getElementById('sellProdSelect').value);
             const qty = parseInt(document.getElementById('sellQty').value);
+            const method = document.getElementById('payMethod').value;
             const item = inventory.find(i => i.id === prodId);
 
             if (item && item.qty >= qty) {
                 item.qty -= qty;
                 const total = item.price * qty;
-                salesHistory.push({ name: item.name, qty, total, date: new Date().toLocaleTimeString('ar-EG') });
+                if (method === 'cash') treasury += total;
                 
                 localStorage.setItem('app_inventory', JSON.stringify(inventory));
-                localStorage.setItem('app_sales', JSON.stringify(salesHistory));
-                
-                alert(`تم إتمام العملية بنجاح! الإجمالي: ${total} ج.م`);
-                openWorkspace('بيع');
-            } else {
-                alert("الكمية المطلوبة غير متوفرة في المخزن!");
-            }
+                localStorage.setItem('app_treasury', treasury);
+                alert(`تم حفظ فاتورة البيع بنجاح! الإجمالي: ${total} ج.م`);
+                closeWorkspace();
+            } else { alert("الكمية المتاحة في المخزن لا تكفي!"); }
         }
 
-        function saveGeneralAction(type) {
-            const name = document.getElementById('actionName').value;
-            const amount = document.getElementById('actionAmount').value;
-            if (name && amount) {
-                alert(`تم تسجيل عملية (${type}) بمبلغ ${amount} ج.م بنجاح!`);
+        function executeBuy() {
+            const name = document.getElementById('buyItem').value;
+            const buyPrice = parseFloat(document.getElementById('buyPrice').value);
+            const qty = parseInt(document.getElementById('buyQty').value);
+            const total = buyPrice * qty;
+
+            if (name && buyPrice && qty) {
+                let item = inventory.find(i => i.name === name);
+                if (item) {
+                    item.qty += qty;
+                    item.buyPrice = buyPrice;
+                } else {
+                    inventory.push({ id: Math.floor(100 + Math.random() * 900), name, buyPrice, price: buyPrice * 1.2, qty });
+                }
+                treasury -= total;
+                localStorage.setItem('app_inventory', JSON.stringify(inventory));
+                localStorage.setItem('app_treasury', treasury);
+                alert(`تم تسجيل الشراء وخصم ${total} ج.م من الخزينة!`);
                 closeWorkspace();
-            } else { alert("يرجى إدخال البيانات المطلوبة!"); }
+            } else { alert("يرجى كتابة كافة البيانات!"); }
+        }
+
+        function updateTreasury() {
+            const type = document.getElementById('treasuryType').value;
+            const amount = parseFloat(document.getElementById('treasuryAmount').value);
+            if (amount) {
+                if (type === 'in') treasury += amount;
+                else treasury -= amount;
+                localStorage.setItem('app_treasury', treasury);
+                alert("تم تحديث الخزينة بنجاح!");
+                openWorkspace('الخزينة');
+            }
         }
 
         function closeWorkspace() { document.getElementById('workspace').style.display = 'none'; }
