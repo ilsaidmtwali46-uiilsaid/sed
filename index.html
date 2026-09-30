@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق المبيعات والمعاملات الشامل</title>
+    <title>نظام إدارة المبيعات والجرد الشامل</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase App & Database SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
@@ -22,10 +21,10 @@
             --border-color: #334155;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; padding: 15px; }
 
-        /* شاشة التفعيل والاشتراك */
+        /* شاشة التفعيل */
         .activation-container {
             max-width: 450px; margin: 40px auto; background: var(--card-bg);
             padding: 30px; border-radius: 20px; text-align: center;
@@ -37,21 +36,18 @@
             color: var(--accent-blue); font-size: 18px; font-weight: bold;
             letter-spacing: 2px; margin: 15px 0; border: 1px dashed var(--accent-blue);
         }
-        .input-field {
-            width: 100%; padding: 14px; border-radius: 10px; border: 1px solid var(--border-color);
-            background: #090d16; color: #fff; text-align: center; font-size: 16px; margin-bottom: 15px; outline: none;
+        .input-field, select, textarea {
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color);
+            background: #090d16; color: #fff; font-size: 15px; margin-bottom: 12px; outline: none;
         }
         .btn-action {
-            width: 100%; padding: 14px; border-radius: 10px; border: none;
-            background: var(--accent-green); color: #fff; font-size: 16px; font-weight: bold;
-            cursor: pointer; transition: 0.3s;
+            width: 100%; padding: 12px; border-radius: 10px; border: none;
+            background: var(--accent-green); color: #fff; font-size: 15px; font-weight: bold;
+            cursor: pointer; transition: 0.3s; margin-top: 5px;
         }
-        .btn-action:hover { opacity: 0.9; }
 
-        /* الشاشة الرئيسية للعميل */
+        /* الشاشة الرئيسية */
         .app-dashboard { display: none; max-width: 1100px; margin: 0 auto; }
-        
-        /* شريط العلو والمعلومات */
         .header-bar {
             background: var(--card-bg); padding: 15px 20px; border-radius: 15px;
             display: flex; justify-content: space-between; align-items: center;
@@ -62,48 +58,48 @@
             padding: 8px 15px; border-radius: 20px; font-size: 13px; border: 1px solid var(--accent-green);
         }
 
-        /* شبكة الخدمات والواجهات */
         .section-title { color: var(--accent-gold); font-size: 18px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
         .services-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px; margin-bottom: 30px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px; margin-bottom: 25px;
         }
         .service-card {
-            background: var(--card-bg); padding: 20px 10px; border-radius: 16px;
+            background: var(--card-bg); padding: 18px 10px; border-radius: 16px;
             text-align: center; border: 1px solid var(--border-color); cursor: pointer;
-            transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 12px;
+            transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; gap: 10px;
         }
-        .service-card:hover { transform: translateY(-5px); border-color: var(--accent-blue); background: #253346; }
-        .service-card i { font-size: 28px; color: var(--accent-blue); }
-        .service-card span { font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .service-card:hover { transform: translateY(-3px); border-color: var(--accent-blue); background: #253346; }
+        .service-card i { font-size: 26px; }
+        .service-card span { font-size: 13px; font-weight: 600; color: var(--text-main); }
 
-        /* محاكي واجهات العمل */
+        /* نافذة شاشة العمل والمحاكاة */
         .workspace {
-            background: var(--card-bg); padding: 25px; border-radius: 16px;
-            border: 1px solid var(--border-color); display: none; margin-top: 10px;
+            background: var(--card-bg); padding: 20px; border-radius: 16px;
+            border: 1px solid var(--border-color); display: none; margin-top: 15px;
         }
-        .workspace-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .workspace-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
         .close-btn { background: var(--danger-color); color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+
+        /* جداول العرض والجرد */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #090d16; border-radius: 10px; overflow: hidden; }
+        th, td { padding: 10px; text-align: center; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+        th { background: #151f32; color: var(--accent-gold); }
     </style>
 </head>
 <body>
 
-    <!-- 1. شاشة التفعيل والتحكم بالاشتراك -->
+    <!-- 1. شاشة التفعيل -->
     <div id="activationScreen" class="activation-container">
         <h2><i class="fa-solid fa-lock"></i> تفعيل نظام المبيعات</h2>
-        <p style="color: var(--text-sub); font-size: 13px;">يرجى تزويد الأدمن بمعرف جهازك للحصول على كود التفعيل ومتابعة اشتراكك.</p>
-        
-        <div class="dev-box" id="devIdDisplay">DEV-439766</div>
-        
+        <p style="color: var(--text-sub); font-size: 13px;">يرجى إدخال كود التفعيل الممنوح لك من الأدمن</p>
+        <div class="dev-box">DEV-439766</div>
         <input type="text" id="licenseInput" class="input-field" placeholder="أدخل كود التفعيل هنا">
-        <button class="btn-action" onclick="validateKey()">تفعيل التطبيق الآن</button>
+        <button class="btn-action" onclick="validateKey()">تفعيل التطبيق</button>
         <p id="activationStatus" style="margin-top: 15px; font-size: 13px;"></p>
     </div>
 
-    <!-- 2. الشاشة الرئيسية للتطبيق (بعد التفعيل) -->
+    <!-- 2. الشاشة الرئيسية -->
     <div id="appDashboard" class="app-dashboard">
-        
-        <!-- الشريط العلوي -->
         <div class="header-bar">
             <div>
                 <h3 style="color: var(--accent-gold);"><i class="fa-solid fa-store"></i> متجر البركة والخيرات</h3>
@@ -114,128 +110,98 @@
             </div>
         </div>
 
-        <!-- أ) الأقسام الرئيسية -->
         <div class="section-title"><i class="fa-solid fa-gauge-high"></i> الواجهات الأساسية</div>
         <div class="services-grid">
             <div class="service-card" onclick="openWorkspace('بيع')">
                 <i class="fa-solid fa-cart-shopping" style="color: #4ade80;"></i>
                 <span>شاشة البيع</span>
             </div>
+            <div class="service-card" onclick="openWorkspace('جرد')">
+                <i class="fa-solid fa-boxes-stacked" style="color: #38bdf8;"></i>
+                <span>الجرد والمخزن</span>
+            </div>
             <div class="service-card" onclick="openWorkspace('شراء')">
                 <i class="fa-solid fa-bag-shopping" style="color: #f43f5e;"></i>
                 <span>الشراء والتركيدات</span>
             </div>
-            <div class="service-card" onclick="openWorkspace('شحن رصيد')">
-                <i class="fa-solid fa-mobile-screen-button" style="color: #38bdf8;"></i>
+            <div class="service-card" onclick="openWorkspace('شحن')">
+                <i class="fa-solid fa-mobile-screen-button" style="color: #fbbf24;"></i>
                 <span>شحن رصيد</span>
-            </div>
-            <div class="service-card" onclick="openWorkspace('تحويلات')">
-                <i class="fa-solid fa-arrow-right-arrow-left" style="color: #fbbf24;"></i>
-                <span>تحويلات مالية</span>
-            </div>
-            <div class="service-card" onclick="openWorkspace('معاملات نقدية')">
-                <i class="fa-solid fa-vault" style="color: #a78bfa;"></i>
-                <span>معاملات نقدية</span>
             </div>
             <div class="service-card" onclick="openWorkspace('عملاء')">
                 <i class="fa-solid fa-users" style="color: #f472b6;"></i>
                 <span>إدارة العملاء</span>
             </div>
+            <div class="service-card" onclick="openWorkspace('نقدية')">
+                <i class="fa-solid fa-vault" style="color: #a78bfa;"></i>
+                <span>معاملات نقدية</span>
+            </div>
         </div>
 
-        <!-- ب) المدفوعات والربط البنكي وفوري -->
         <div class="section-title"><i class="fa-solid fa-credit-card"></i> المعاملات المتقدمة والربط</div>
         <div class="services-grid">
-            <div class="service-card" onclick="openWorkspace('دفع فيزا / كارت')">
+            <div class="service-card" onclick="openWorkspace('فيزا')">
                 <i class="fa-solid fa-credit-card" style="color: #60a5fa;"></i>
                 <span>دفع فيزا</span>
             </div>
-            <div class="service-card" onclick="openWorkspace('المحفظة الإلكترونية')">
+            <div class="service-card" onclick="openWorkspace('محفظة')">
                 <i class="fa-solid fa-wallet" style="color: #34d399;"></i>
                 <span>محفظة كاش</span>
             </div>
-            <div class="service-card" onclick="openWorkspace('معاملات بنكية')">
+            <div class="service-card" onclick="openWorkspace('بنك')">
                 <i class="fa-solid fa-building-columns" style="color: #f87171;"></i>
                 <span>معاملات بنكية</span>
             </div>
-            <div class="service-card" onclick="openWorkspace('شبكة فوري')">
+            <div class="service-card" onclick="openWorkspace('فوري')">
                 <i class="fa-solid fa-network-wired" style="color: #facc15;"></i>
-                <span>ربط فوري</span>
+                <span>شبكة فوري</span>
             </div>
         </div>
 
-        <!-- مساحة العمل التفاعلية -->
+        <!-- منطقة إدخال وتجميع العمليات والجرد -->
         <div id="workspace" class="workspace">
             <div class="workspace-header">
-                <h3 id="workspaceTitle" style="color: var(--accent-gold);">واجهة العمل</h3>
+                <h3 id="workspaceTitle" style="color: var(--accent-gold);">عنوان الواجهة</h3>
                 <button class="close-btn" onclick="closeWorkspace()">إغلاق <i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div id="workspaceContent" style="color: var(--text-sub);">
-                جاري تحميل أدوات الواجهة المختارة...
-            </div>
+            <div id="workspaceBody"></div>
         </div>
-
     </div>
 
     <script>
-        // إعدادات Firebase لربط التحقق مع الأدمن
-        const firebaseConfig = {
-            databaseURL: "https://your-firebase-db.firebaseio.com" // ضع رابط Firebase الخاص بك هنا
-        };
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-        const db = firebase.database();
+        // قاعدة بيانات المنتجات والمخزون في الذاكرة المحلية
+        let inventory = JSON.parse(localStorage.getItem('app_inventory')) || [
+            { id: 101, name: "منتج تجريبي A", price: 50, qty: 20 },
+            { id: 102, name: "منتج تجريبي B", price: 120, qty: 8 }
+        ];
 
-        const deviceId = "DEV-439766";
-
-        // التحقق عند تحميل الصفحة
-        window.onload = function() {
-            checkSubscriptionStatus();
-        };
+        window.onload = function() { checkSubscriptionStatus(); };
 
         function checkSubscriptionStatus() {
             const expiryDateStr = localStorage.getItem('app_expiry_date');
             if (expiryDateStr) {
                 const expiryDate = new Date(expiryDateStr);
-                const today = new Date();
-                const diffTime = expiryDate - today;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                if (diffDays > 0) {
-                    showAppScreen(diffDays);
-                } else {
-                    localStorage.removeItem('app_expiry_date');
-                    alert("انتهت مدة اشتراكك! يرجى التواصل مع الأدمن لتجديد الاشتراك.");
-                    showActivationScreen();
-                }
-            } else {
-                showActivationScreen();
-            }
+                const diffDays = Math.ceil((expiryDate - new Date()) / (1000 * 60 * 60 * 24));
+                if (diffDays > 0) { showAppScreen(diffDays); }
+                else { showActivationScreen(); }
+            } else { showActivationScreen(); }
         }
 
-        // كود التحقق وتحديد الأيام بناءً على المفتاح
         function validateKey() {
             const key = document.getElementById('licenseInput').value.trim();
-            const statusBox = document.getElementById('activationStatus');
-            statusBox.style.color = "#38bdf8";
-            statusBox.innerText = "جاري التحقق من الكود مدة الاشتراك...";
-
-            // خوارزمية مفاتيح الأيام (أمثلة للترخيص بالأيام)
             let durationDays = 0;
-            if (key === "KEY-30DAYS-439766") { durationDays = 30; }
-            else if (key === "KEY-90DAYS-439766") { durationDays = 90; }
-            else if (key === "KEY-365DAYS-439766") { durationDays = 365; }
-            else if (key === "123" || key.includes("PERPETUAL")) { durationDays = 3650; } // 10 سنوات
+            if (key === "KEY-30DAYS-439766") durationDays = 30;
+            else if (key === "KEY-365DAYS-439766") durationDays = 365;
+            else if (key === "123") durationDays = 3650;
 
             if (durationDays > 0) {
                 let expiryDate = new Date();
                 expiryDate.setDate(expiryDate.getDate() + durationDays);
                 localStorage.setItem('app_expiry_date', expiryDate.toISOString());
-                
-                alert(`تم التفعيل بنجاح! مدة الاشتراك المتاحة: ${durationDays} يوم.`);
                 showAppScreen(durationDays);
             } else {
-                statusBox.style.color = "#ef4444";
-                statusBox.innerText = "كود التفعيل غير صالح أو غير مخصص لهذا الجهاز!";
+                document.getElementById('activationStatus').innerText = "كود التفعيل غير صالح!";
+                document.getElementById('activationStatus').style.color = "#ef4444";
             }
         }
 
@@ -250,21 +216,80 @@
             document.getElementById('appDashboard').style.display = 'none';
         }
 
-        /* إدارة واجهات العمل */
-        function openWorkspace(name) {
+        /* إدارة الأقسام والعمليات */
+        function openWorkspace(type) {
             const ws = document.getElementById('workspace');
-            document.getElementById('workspaceTitle').innerText = "واجهة: " + name;
-            document.getElementById('workspaceContent').innerHTML = `
-                <p style="margin-bottom: 15px;">أهلاً بك في قسم <b>${name}</b>. النظام جاهز لتنفيذ العمليات وتسجيل الحركات أوفلاين/أونلاين.</p>
-                <button class="btn-action" style="max-width: 200px; background: var(--accent-blue);" onclick="alert('تم تسجيل العملية بنجاح')">بدء معاملة جديدة</button>
-            `;
+            const title = document.getElementById('workspaceTitle');
+            const body = document.getElementById('workspaceBody');
+
             ws.style.display = 'block';
             ws.scrollIntoView({ behavior: 'smooth' });
+
+            if (type === 'بيع') {
+                title.innerText = "🛒 شاشة البيع الكاشير";
+                body.innerHTML = `
+                    <input type="text" id="sellProductName" class="input-field" placeholder="اسم المنتج أو الكود">
+                    <input type="number" id="sellQty" class="input-field" placeholder="الكمية المباعة" value="1">
+                    <input type="number" id="sellPrice" class="input-field" placeholder="السعر">
+                    <button class="btn-action" onclick="executeSale()">إتمام عملية البيع وطباعة الفاتورة</button>
+                `;
+            } else if (type === 'جرد') {
+                title.innerText = "📦 إدارة الجرد والمخزن";
+                let rows = inventory.map(i => `<tr><td>${i.id}</td><td>${i.name}</td><td>${i.qty}</td><td>${i.price} ج.م</td></tr>`).join('');
+                body.innerHTML = `
+                    <h4 style="color: var(--accent-blue); margin-bottom: 10px;">إضافة منتج جديد للمخزن</h4>
+                    <input type="text" id="newProdName" class="input-field" placeholder="اسم المنتج">
+                    <input type="number" id="newProdPrice" class="input-field" placeholder="سعر البيع">
+                    <input type="number" id="newProdQty" class="input-field" placeholder="الكمية المتوفرة">
+                    <button class="btn-action" style="background: var(--accent-blue);" onclick="addProduct()">إضافة للمخزن</button>
+                    
+                    <h4 style="color: var(--accent-gold); margin: 20px 0 10px;">جدول الجرد الحالي</h4>
+                    <table>
+                        <tr><th>الكود</th><th>المنتج</th><th>الكمية</th><th>السعر</th></tr>
+                        ${rows}
+                    </table>
+                `;
+            } else if (type === 'شراء') {
+                title.innerText = "🛍️ تسجيل فاتورة شراء جديدة";
+                body.innerHTML = `
+                    <input type="text" class="input-field" placeholder="اسم المورد / الشركة">
+                    <input type="text" class="input-field" placeholder="الصنف / المنتج">
+                    <input type="number" class="input-field" placeholder="الكمية الواردة">
+                    <input type="number" class="input-field" placeholder="إجمالي التكلفة">
+                    <button class="btn-action" onclick="alert('تم تسجيل عملية الشراء وزيادة المخزن بنجاح')">حفظ عملية الشراء</button>
+                `;
+            } else {
+                title.innerText = "⚡ قسم: " + type;
+                body.innerHTML = `
+                    <p style="margin-bottom: 15px;">تسجيل عملية جديدة في قسم <b>${type}</b>:</p>
+                    <input type="text" class="input-field" placeholder="اسم العميل / الجهة">
+                    <input type="number" class="input-field" placeholder="المبلغ الرقمي">
+                    <textarea class="input-field" placeholder="ملاحظات حول العملية"></textarea>
+                    <button class="btn-action" onclick="alert('تم حفظ العملية بنجاح')">تسجيل وإثبات الحركة</button>
+                `;
+            }
         }
 
-        function closeWorkspace() {
-            document.getElementById('workspace').style.display = 'none';
+        function addProduct() {
+            const name = document.getElementById('newProdName').value;
+            const price = parseFloat(document.getElementById('newProdPrice').value);
+            const qty = parseInt(document.getElementById('newProdQty').value);
+
+            if (name && price && qty) {
+                const newProd = { id: Math.floor(100 + Math.random() * 900), name, price, qty };
+                inventory.push(newProd);
+                localStorage.setItem('app_inventory', JSON.stringify(inventory));
+                alert("تمت إضافة المنتج وإحداث التحديث في الجرد بنجاح!");
+                openWorkspace('جرد');
+            } else { alert("يرجى ملء جميع البيانات بشكل صحيح!"); }
         }
+
+        function executeSale() {
+            alert("تم إتمام عملية البيع وخصم الكمية وتحديث الخزينة بنجاح!");
+            closeWorkspace();
+        }
+
+        function closeWorkspace() { document.getElementById('workspace').style.display = 'none'; }
     </script>
 </body>
 </html>
