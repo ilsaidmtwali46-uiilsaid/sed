@@ -178,6 +178,8 @@
         ];
 
         let treasury = parseFloat(localStorage.getItem('app_treasury')) || 1000;
+        let customers = JSON.parse(localStorage.getItem('app_customers')) || [];
+        let vendors = JSON.parse(localStorage.getItem('app_vendors')) || [];
 
         document.addEventListener("DOMContentLoaded", function() {
             checkSubscriptionStatus();
@@ -256,6 +258,8 @@
                     <select id="sellProdSelect">
                         ${inventory.map(i => `<option value="${i.id}">${i.name} - المتاح: (${i.qty}) - السعر: ${i.price} ج.م</option>`).join('')}
                     </select>
+                    <label>اسم العميل (في حالة الآجل):</label>
+                    <input type="text" id="sellCustomerName" class="input-field" placeholder="اسم العميل">
                     <label>طريقة الدفع:</label>
                     <select id="payMethod">
                         <option value="cash">نقدي (كاش)</option>
@@ -265,6 +269,17 @@
                     <input type="number" id="sellQty" class="input-field" value="1">
                     <button class="btn-action" onclick="executeSale()">حفظ الفاتورة وتحديث الخزينة</button>
                 `;
+            } else if (type === 'مرتجع_مبيعات') {
+                title.innerText = "↩️ مرتجع مبيعات";
+                body.innerHTML = `
+                    <label>اختر الصنف المراد إرجاعه:</label>
+                    <select id="returnProdSelect">
+                        ${inventory.map(i => `<option value="${i.id}">${i.name}</option>`).join('')}
+                    </select>
+                    <input type="number" id="returnQty" class="input-field" placeholder="الكمية المرتجعة" value="1">
+                    <input type="number" id="returnPrice" class="input-field" placeholder="سعر القطعة المرتجعة">
+                    <button class="btn-action" style="background: var(--danger-color);" onclick="executeReturnSale()">تسجيل المرتجع وخصم المبلغ من الخزينة</button>
+                `;
             } else if (type === 'مشتريات') {
                 title.innerText = "📥 فاتورة مشتريات (وارد للمخزن)";
                 body.innerHTML = `
@@ -273,6 +288,17 @@
                     <input type="number" id="buyPrice" class="input-field" placeholder="سعر الشراء للصنف">
                     <input type="number" id="buyQty" class="input-field" placeholder="الكمية الواردة">
                     <button class="btn-action" style="background: var(--accent-blue);" onclick="executeBuy()">تسجيل المشتريات والخصم من الخزينة</button>
+                `;
+            } else if (type === 'مرتجع_مشتريات') {
+                title.innerText = "📤 مرتجع مشتريات للمورد";
+                body.innerHTML = `
+                    <label>اختر الصنف:</label>
+                    <select id="returnBuyProdSelect">
+                        ${inventory.map(i => `<option value="${i.id}">${i.name} - المتاح: (${i.qty})</option>`).join('')}
+                    </select>
+                    <input type="number" id="returnBuyQty" class="input-field" placeholder="الكمية المرجعة للمورد">
+                    <input type="number" id="returnBuyPrice" class="input-field" placeholder="سعر الشراء للقطعة">
+                    <button class="btn-action" style="background: var(--accent-gold);" onclick="executeReturnBuy()">خصم من المخزن وإضافة المبلغ للخزينة</button>
                 `;
             } else if (type === 'جرد') {
                 title.innerText = "📦 جدول جرد المخزون والربحية";
@@ -291,6 +317,16 @@
                     <input type="number" id="newProdQty" class="input-field" placeholder="الرصيد الافتتاحي">
                     <button class="btn-action" onclick="addProduct()">حفظ الصنف في قاعدة البيانات</button>
                 `;
+            } else if (type === 'تسوية') {
+                title.innerText = "⚖️ تسوية مخزنية (عجز / زيادة)";
+                body.innerHTML = `
+                    <label>اختر الصنف:</label>
+                    <select id="adjustProdSelect">
+                        ${inventory.map(i => `<option value="${i.id}">${i.name} - الحالي: (${i.qty})</option>`).join('')}
+                    </select>
+                    <input type="number" id="newActualQty" class="input-field" placeholder="الكمية الحقيقية الفعلية">
+                    <button class="btn-action" onclick="adjustInventory()">تحديث الكمية بالمخزن</button>
+                `;
             } else if (type === 'الخزينة') {
                 title.innerText = "💰 حركة الخزينة والنقدية";
                 body.innerHTML = `
@@ -307,9 +343,38 @@
                     <input type="text" id="treasuryNote" class="input-field" placeholder="البيان / السبب">
                     <button class="btn-action" onclick="updateTreasury()">تسجيل الحركة المباشرة</button>
                 `;
-            } else {
-                title.innerText = "⚙️ واجهة: " + type;
-                body.innerHTML = `<p style="color: var(--text-sub);">الواجهة جاهزة لمعالجة حركات <b>${type}</b> وفق القواعد المحاسبية.</p>`;
+            } else if (type === 'عملاء') {
+                title.innerText = "👥 حسابات العملاء والديون";
+                body.innerHTML = `
+                    <input type="text" id="custName" class="input-field" placeholder="اسم العميل">
+                    <input type="number" id="custPay" class="input-field" placeholder="تحصيل مبلغ من حساب آجل">
+                    <button class="btn-action" onclick="payCustomerDebt()">تسجيل سداد العميل</button>
+                    <h4 style="margin-top:15px; color:var(--accent-gold);">سجل الآجل:</h4>
+                    <table>
+                        <tr><th>العميل</th><th>المبلغ الآجل</th></tr>
+                        ${customers.map(c => `<tr><td>${c.name}</td><td>${c.debt} ج.م</td></tr>`).join('')}
+                    </table>
+                `;
+            } else if (type === 'موردين') {
+                title.innerText = "🤝 حسابات الموردين المستحقة";
+                body.innerHTML = `
+                    <input type="text" id="vendName" class="input-field" placeholder="اسم المورد">
+                    <input type="number" id="vendPay" class="input-field" placeholder="مبلغ مدفوع للمورد">
+                    <button class="btn-action" onclick="payVendorDebt()">تسجيل دفع للمورد الخزينة (-)</button>
+                    <h4 style="margin-top:15px; color:var(--accent-gold);">المستحقات للموردين:</h4>
+                    <table>
+                        <tr><th>المورد</th><th>له عندنا</th></tr>
+                        ${vendors.map(v => `<tr><td>${v.name}</td><td>${v.debt} ج.م</td></tr>`).join('')}
+                    </table>
+                `;
+            } else if (type === 'خدمات_شحن') {
+                title.innerText = "📲 خدمات الشحن والدفع الإلكتروني";
+                body.innerHTML = `
+                    <input type="text" id="chargeType" class="input-field" placeholder="اسم الخدمة (فوري / كارت / فودافون كاش)">
+                    <input type="number" id="chargeAmount" class="input-field" placeholder="قيمة الشحن (المخصوم من الخزينة)">
+                    <input type="number" id="chargeProfit" class="input-field" placeholder="عمولة/ربح العملية">
+                    <button class="btn-action" onclick="executeCharging()">تسجيل عملية الشحن</button>
+                `;
             }
         }
 
@@ -331,18 +396,43 @@
             const prodId = parseInt(document.getElementById('sellProdSelect').value);
             const qty = parseInt(document.getElementById('sellQty').value);
             const method = document.getElementById('payMethod').value;
+            const custName = document.getElementById('sellCustomerName').value;
             const item = inventory.find(i => i.id === prodId);
 
             if (item && item.qty >= qty) {
                 item.qty -= qty;
                 const total = item.price * qty;
-                if (method === 'cash') treasury += total;
+                if (method === 'cash') {
+                    treasury += total;
+                } else if (method === 'credit') {
+                    if (!custName) { alert("يرجى إدخال اسم العميل للآجل!"); return; }
+                    let cust = customers.find(c => c.name === custName);
+                    if (cust) cust.debt += total;
+                    else customers.push({ name: custName, debt: total });
+                    localStorage.setItem('app_customers', JSON.stringify(customers));
+                }
                 
                 localStorage.setItem('app_inventory', JSON.stringify(inventory));
                 localStorage.setItem('app_treasury', treasury);
                 alert(`تم حفظ فاتورة البيع بنجاح! الإجمالي: ${total} ج.م`);
                 closeWorkspace();
             } else { alert("الكمية المتاحة في المخزن لا تكفي!"); }
+        }
+
+        function executeReturnSale() {
+            const prodId = parseInt(document.getElementById('returnProdSelect').value);
+            const qty = parseInt(document.getElementById('returnQty').value);
+            const price = parseFloat(document.getElementById('returnPrice').value);
+            const item = inventory.find(i => i.id === prodId);
+
+            if (item && qty && price) {
+                item.qty += qty;
+                treasury -= (price * qty);
+                localStorage.setItem('app_inventory', JSON.stringify(inventory));
+                localStorage.setItem('app_treasury', treasury);
+                alert("تم تسجيل مرتجع المبيعات وإرجاع المبلغ للعميل من الخزينة!");
+                closeWorkspace();
+            } else { alert("يرجى التأكد من ملء البيانات بشكل صحيح!"); }
         }
 
         function executeBuy() {
@@ -367,6 +457,35 @@
             } else { alert("يرجى كتابة كافة البيانات!"); }
         }
 
+        function executeReturnBuy() {
+            const prodId = parseInt(document.getElementById('returnBuyProdSelect').value);
+            const qty = parseInt(document.getElementById('returnBuyQty').value);
+            const price = parseFloat(document.getElementById('returnBuyPrice').value);
+            const item = inventory.find(i => i.id === prodId);
+
+            if (item && item.qty >= qty && price) {
+                item.qty -= qty;
+                treasury += (price * qty);
+                localStorage.setItem('app_inventory', JSON.stringify(inventory));
+                localStorage.setItem('app_treasury', treasury);
+                alert("تم تسجيل مرتجع المشتريات واسترداد المبلغ للخزينة!");
+                closeWorkspace();
+            } else { alert("الكمية المتاحة في المخزن غير كافية للمرتجع!"); }
+        }
+
+        function adjustInventory() {
+            const prodId = parseInt(document.getElementById('adjustProdSelect').value);
+            const actualQty = parseInt(document.getElementById('newActualQty').value);
+            const item = inventory.find(i => i.id === prodId);
+
+            if (item && !isNaN(actualQty)) {
+                item.qty = actualQty;
+                localStorage.setItem('app_inventory', JSON.stringify(inventory));
+                alert("تمت التسوية بنجاح وتحديث الرصيد بالمخزن!");
+                openWorkspace('جرد');
+            }
+        }
+
         function updateTreasury() {
             const type = document.getElementById('treasuryType').value;
             const amount = parseFloat(document.getElementById('treasuryAmount').value);
@@ -376,6 +495,48 @@
                 localStorage.setItem('app_treasury', treasury);
                 alert("تم تحديث الخزينة بنجاح!");
                 openWorkspace('الخزينة');
+            }
+        }
+
+        function payCustomerDebt() {
+            const custName = document.getElementById('custName').value;
+            const pay = parseFloat(document.getElementById('custPay').value);
+            let cust = customers.find(c => c.name === custName);
+
+            if (cust && pay) {
+                cust.debt -= pay;
+                treasury += pay;
+                localStorage.setItem('app_customers', JSON.stringify(customers));
+                localStorage.setItem('app_treasury', treasury);
+                alert("تم تحصيل المبلغ وإضافته للخزينة!");
+                openWorkspace('عملاء');
+            } else { alert("اسم العميل غير موجود أو المبلغ غير صحيح!"); }
+        }
+
+        function payVendorDebt() {
+            const vendName = document.getElementById('vendName').value;
+            const pay = parseFloat(document.getElementById('vendPay').value);
+            let vend = vendors.find(v => v.name === vendName);
+
+            if (vend && pay) {
+                vend.debt -= pay;
+                treasury -= pay;
+                localStorage.setItem('app_vendors', JSON.stringify(vendors));
+                localStorage.setItem('app_treasury', treasury);
+                alert("تم دفع المبلغ للمورد وخصمه من الخزينة!");
+                openWorkspace('موردين');
+            } else { alert("اسم المورد غير موجود أو لا تكفي الخزينة!"); }
+        }
+
+        function executeCharging() {
+            const amount = parseFloat(document.getElementById('chargeAmount').value);
+            const profit = parseFloat(document.getElementById('chargeProfit').value) || 0;
+
+            if (amount) {
+                treasury += profit; // أرباح الشحن تزيد الخزينة صافي
+                localStorage.setItem('app_treasury', treasury);
+                alert(`تم تسجيل العملية وإضافة ربح ${profit} ج.م للخزينة!`);
+                closeWorkspace();
             }
         }
 
