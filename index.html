@@ -42,7 +42,6 @@
             background: var(--accent-green); color: #fff; font-size: 15px; font-weight: bold;
             cursor: pointer; transition: 0.3s; margin-top: 5px;
         }
-        .btn-action:active { transform: scale(0.98); opacity: 0.9; }
 
         .app-dashboard { display: none; max-width: 1100px; margin: 0 auto; }
         .header-bar {
@@ -90,7 +89,7 @@
         <div class="dev-box">DEV-439766</div>
         <input type="text" id="licenseInput" class="input-field" placeholder="أدخل كود التفعيل هنا">
         <button class="btn-action" onclick="validateKey()">تفعيل التطبيق</button>
-        <p id="activationStatus" style="margin-top: 15px; font-size: 13px; font-weight: bold;"></p>
+        <p id="activationStatus" style="margin-top: 15px; font-size: 13px;"></p>
     </div>
 
     <!-- الشاشة الرئيسية -->
@@ -153,7 +152,7 @@
             </div>
         </div>
 
-        <!-- منطقة العمل والتفاعل -->
+        <!-- منطقة إدخال وتجربة البيانات الحقيقية -->
         <div id="workspace" class="workspace">
             <div class="workspace-header">
                 <h3 id="workspaceTitle" style="color: var(--accent-gold);">عنوان الواجهة</h3>
@@ -196,9 +195,8 @@
                 localStorage.setItem('app_expiry_date', expiryDate.toISOString());
                 showAppScreen(durationDays);
             } else {
-                const status = document.getElementById('activationStatus');
-                status.innerText = "كود التفعيل غير صالح!";
-                status.style.color = "#ef4444";
+                document.getElementById('activationStatus').innerText = "كود التفعيل غير صالح!";
+                document.getElementById('activationStatus').style.color = "#ef4444";
             }
         }
 
@@ -235,7 +233,7 @@
                     <h4 style="color: var(--accent-gold); margin-top: 15px;">سجل المبيعات الأخيرة</h4>
                     <table>
                         <tr><th>المنتج</th><th>الكمية</th><th>الإجمالي</th></tr>
-                        ${salesHistory.slice(-5).reverse().map(s => `<tr><td>${s.name}</td><td>${s.qty}</td><td>${s.total} ج.م</td></tr>`).join('')}
+                        ${salesHistory.map(s => `<tr><td>${s.name}</td><td>${s.qty}</td><td>${s.total} ج.م</td></tr>`).join('')}
                     </table>
                 `;
             } else if (type === 'جرد') {
