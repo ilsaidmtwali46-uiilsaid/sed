@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام إدارة المبيعات والحسابات الشامل</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -38,10 +36,11 @@
         }
 
         .btn-action {
-            width: 100%; padding: 12px; border-radius: 10px; border: none;
-            background: var(--accent-green); color: #fff; font-size: 15px; font-weight: bold;
+            width: 100%; padding: 14px; border-radius: 10px; border: none;
+            background: var(--accent-green); color: #fff; font-size: 16px; font-weight: bold;
             cursor: pointer; transition: 0.3s; margin-top: 5px;
         }
+        .btn-action:active { transform: scale(0.98); opacity: 0.9; }
 
         .app-dashboard { display: none; max-width: 1100px; margin: 0 auto; }
         .header-bar {
@@ -82,17 +81,17 @@
 </head>
 <body>
 
-    <!-- شاشة التفعيل -->
+    <!-- 1. شاشة التفعيل -->
     <div id="activationScreen" class="activation-container">
         <h2 style="color: var(--accent-gold);"><i class="fa-solid fa-lock"></i> تفعيل النظام</h2>
         <p style="color: var(--text-sub); font-size: 13px;">أدخل كود التفعيل الممنوح لك من الأدمن</p>
         <div class="dev-box">DEV-439766</div>
         <input type="text" id="licenseInput" class="input-field" placeholder="أدخل كود التفعيل هنا">
-        <button class="btn-action" onclick="validateKey()">تفعيل التطبيق</button>
-        <p id="activationStatus" style="margin-top: 15px; font-size: 13px;"></p>
+        <button id="activateBtn" class="btn-action" onclick="validateKey()">تفعيل التطبيق</button>
+        <p id="activationStatus" style="margin-top: 15px; font-size: 13px; font-weight: bold;"></p>
     </div>
 
-    <!-- الشاشة الرئيسية المحدثة محاسبياً -->
+    <!-- 2. الشاشة الرئيسية -->
     <div id="appDashboard" class="app-dashboard">
         <div class="header-bar">
             <div>
@@ -104,7 +103,7 @@
             </div>
         </div>
 
-        <!-- 1. المبيعات والمشتريات -->
+        <!-- الحركة التجارية -->
         <div class="section-title"><i class="fa-solid fa-cart-flatbed"></i> الحركة التجارية (البيع والشراء)</div>
         <div class="services-grid">
             <div class="service-card" onclick="openWorkspace('مبيعات')">
@@ -125,7 +124,7 @@
             </div>
         </div>
 
-        <!-- 2. المخزون والجرد -->
+        <!-- المخزون والجرد -->
         <div class="section-title"><i class="fa-solid fa-boxes-stacked"></i> إدارة المخزن والتسويات</div>
         <div class="services-grid">
             <div class="service-card" onclick="openWorkspace('جرد')">
@@ -142,8 +141,8 @@
             </div>
         </div>
 
-        <!-- 3. الحسابات والمالية -->
-        <div class="section-title"><i class="fa-solid fa-vault"></i> الخزينة والشركاء (العملاء والموردين)</div>
+        <!-- الخزينة والحسابات -->
+        <div class="section-title"><i class="fa-solid fa-vault"></i> الخزينة والشركاء</div>
         <div class="services-grid">
             <div class="service-card" onclick="openWorkspace('الخزينة')">
                 <i class="fa-solid fa-building-columns" style="color: #facc15;"></i>
@@ -163,7 +162,6 @@
             </div>
         </div>
 
-        <!-- منطقة العمليات الحقيقية -->
         <div id="workspace" class="workspace">
             <div class="workspace-header">
                 <h3 id="workspaceTitle" style="color: var(--accent-gold);">عنوان الواجهة</h3>
@@ -179,37 +177,56 @@
             { id: 102, name: "صنف تجريبي 2", price: 120, buyPrice: 90, qty: 8 }
         ];
 
-        let customers = JSON.parse(localStorage.getItem('app_customers')) || [];
-        let vendors = JSON.parse(localStorage.getItem('app_vendors')) || [];
-        let treasury = JSON.parse(localStorage.getItem('app_treasury')) || 1000; // رصيد بداية الخزينة
+        let treasury = parseFloat(localStorage.getItem('app_treasury')) || 1000;
 
-        window.onload = function() { checkSubscriptionStatus(); };
+        document.addEventListener("DOMContentLoaded", function() {
+            checkSubscriptionStatus();
+        });
 
         function checkSubscriptionStatus() {
             const expiryDateStr = localStorage.getItem('app_expiry_date');
             if (expiryDateStr) {
                 const expiryDate = new Date(expiryDateStr);
-                const diffDays = Math.ceil((expiryDate - new Date()) / (1000 * 60 * 60 * 24));
-                if (diffDays > 0) { showAppScreen(diffDays); }
-                else { showActivationScreen(); }
-            } else { showActivationScreen(); }
+                const today = new Date();
+                const diffTime = expiryDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays > 0) {
+                    showAppScreen(diffDays);
+                } else {
+                    showActivationScreen();
+                }
+            } else {
+                showActivationScreen();
+            }
         }
 
         function validateKey() {
-            const key = document.getElementById('licenseInput').value.trim();
+            const keyInput = document.getElementById('licenseInput');
+            const statusBox = document.getElementById('activationStatus');
+            const key = keyInput.value.trim().toUpperCase();
+
             let durationDays = 0;
-            if (key === "KEY-30DAYS-439766") durationDays = 30;
-            else if (key === "KEY-365DAYS-439766") durationDays = 365;
-            else if (key === "123") durationDays = 3650;
+
+            if (key === "KEY-30DAYS-439766") { durationDays = 30; }
+            else if (key === "KEY-90DAYS-439766") { durationDays = 90; }
+            else if (key === "KEY-365DAYS-439766") { durationDays = 365; }
+            else if (key === "123" || key.includes("PERPETUAL")) { durationDays = 3650; }
 
             if (durationDays > 0) {
                 let expiryDate = new Date();
                 expiryDate.setDate(expiryDate.getDate() + durationDays);
                 localStorage.setItem('app_expiry_date', expiryDate.toISOString());
-                showAppScreen(durationDays);
+                
+                statusBox.style.color = "#22c55e";
+                statusBox.innerText = "تم التفعيل بنجاح! جاري فتح التطبيق...";
+                
+                setTimeout(function() {
+                    showAppScreen(durationDays);
+                }, 500);
             } else {
-                document.getElementById('activationStatus').innerText = "كود التفعيل غير صالح!";
-                document.getElementById('activationStatus').style.color = "#ef4444";
+                statusBox.style.color = "#ef4444";
+                statusBox.innerText = "كود التفعيل غير صالح! تأكد من الكود المكتوب.";
             }
         }
 
@@ -243,9 +260,8 @@
                     <select id="payMethod">
                         <option value="cash">نقدي (كاش)</option>
                         <option value="credit">آجل (على الحساب)</option>
-                        <option value="visa">فيزا / كارت</option>
                     </select>
-                    <label>الكمية:</label>
+                    <label>الكمية المباعة:</label>
                     <input type="number" id="sellQty" class="input-field" value="1">
                     <button class="btn-action" onclick="executeSale()">حفظ الفاتورة وتحديث الخزينة</button>
                 `;
