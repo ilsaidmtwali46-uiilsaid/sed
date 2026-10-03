@@ -3,309 +3,412 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام المبيعات والجرد الشامل</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <title>لوحة تحكم الأدمن وإدارة الاشتراكات</title>
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --accent-gold: #f59e0b;
-            --accent-blue: #38bdf8;
-            --accent-green: #22c55e;
-            --danger-color: #ef4444;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
-            --border-color: #334155;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; padding: 15px; }
-
-        .activation-container {
-            max-width: 450px; margin: 40px auto; background: var(--card-bg);
-            padding: 25px; border-radius: 20px; text-align: center; border: 1px solid var(--border-color);
-        }
-        .dev-box {
-            background: #090d16; padding: 12px; border-radius: 10px; color: var(--accent-blue);
-            font-size: 18px; font-weight: bold; margin: 15px 0; border: 1px dashed var(--accent-blue);
-        }
-
-        .input-field, select, textarea {
-            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color);
-            background: #090d16; color: #fff; font-size: 14px; margin-bottom: 10px; outline: none;
-        }
-
-        .btn-action {
-            width: 100%; padding: 12px; border-radius: 10px; border: none;
-            background: var(--accent-green); color: #fff; font-size: 15px; font-weight: bold;
-            cursor: pointer; transition: 0.3s; margin-top: 5px;
-        }
-
-        .app-dashboard { display: none; max-width: 1100px; margin: 0 auto; }
-        .header-bar {
-            background: var(--card-bg); padding: 15px; border-radius: 15px;
-            display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid var(--border-color); margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
-        }
-        .subscription-badge {
-            background: rgba(34, 197, 94, 0.15); color: var(--accent-green);
-            padding: 6px 12px; border-radius: 20px; font-size: 12px; border: 1px solid var(--accent-green);
-        }
-
-        .section-title { color: var(--accent-gold); font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-        .services-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 12px; margin-bottom: 20px;
-        }
-        .service-card {
-            background: var(--card-bg); padding: 15px 10px; border-radius: 14px;
-            text-align: center; border: 1px solid var(--border-color); cursor: pointer;
-            display: flex; flex-direction: column; align-items: center; gap: 8px;
-        }
-        .service-card:hover { border-color: var(--accent-blue); background: #253346; }
-        .service-card i { font-size: 24px; }
-        .service-card span { font-size: 13px; font-weight: 600; }
-
-        .workspace {
-            background: var(--card-bg); padding: 20px; border-radius: 16px;
-            border: 1px solid var(--border-color); display: none; margin-top: 15px;
-        }
-        .workspace-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-        .close-btn { background: var(--danger-color); color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #090d16; border-radius: 8px; overflow: hidden; }
-        th, td { padding: 10px; text-align: center; border-bottom: 1px solid var(--border-color); font-size: 12px; }
-        th { background: #151f32; color: var(--accent-gold); }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; margin: 0; padding: 15px; direction: rtl; }
+        h1, h2, h3 { color: #38bdf8; text-align: center; margin-top: 0; }
+        .container { max-width: 950px; margin: 0 auto; }
+        .card { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 1px solid #334155; }
+        label { display: block; margin: 10px 0 5px; font-weight: bold; color: #cbd5e1; font-size: 13px; }
+        input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 14px; margin-bottom: 10px; box-sizing: border-box; }
+        .btn { padding: 8px 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; margin-top: 5px; }
+        .btn-green { background: #22c55e; color: white; }
+        .btn-blue { background: #0284c7; color: white; }
+        .btn-red { background: #ef4444; color: white; }
+        .btn-orange { background: #f97316; color: white; }
+        .btn-purple { background: #8b5cf6; color: white; }
+        .btn-indigo { background: #6366f1; color: white; }
+        .btn:hover { opacity: 0.9; }
+        .flex-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .flex-group > * { flex: 1; min-width: 140px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #0f172a; border-radius: 8px; overflow: hidden; font-size: 13px; }
+        th, td { padding: 10px; text-align: center; border-bottom: 1px solid #334155; }
+        th { background: #334155; color: #38bdf8; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; display: inline-block; }
+        .badge-active { background: #166534; color: #4ade80; }
+        .badge-disabled { background: #991b1b; color: #fca5a5; }
+        code { background: #0f172a; padding: 2px 6px; border-radius: 4px; color: #38bdf8; font-family: monospace; }
+        .history-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; margin-top: 10px; max-height: 200px; overflow-y: auto; font-size: 12px; }
     </style>
 </head>
 <body>
 
-    <!-- شاشة التفعيل -->
-    <div id="activationScreen" class="activation-container">
-        <h2 style="color: var(--accent-gold);"><i class="fa-solid fa-lock"></i> تفعيل النظام</h2>
-        <p style="color: var(--text-sub); font-size: 13px;">أدخل كود التفعيل الممنوح لك من الأدمن</p>
-        <div class="dev-box">DEV-439766</div>
-        <input type="text" id="licenseInput" class="input-field" placeholder="أدخل كود التفعيل هنا">
-        <button class="btn-action" onclick="validateKey()">تفعيل التطبيق</button>
-        <p id="activationStatus" style="margin-top: 15px; font-size: 13px;"></p>
-    </div>
+<div class="container">
+    <h1>👑 لوحة تحكم الأدمن والاشتراكات المباشرة</h1>
 
-    <!-- الشاشة الرئيسية -->
-    <div id="appDashboard" class="app-dashboard">
-        <div class="header-bar">
-            <div>
-                <h3 style="color: var(--accent-gold);"><i class="fa-solid fa-store"></i> متجر البركة والخيرات</h3>
-                <span style="font-size: 12px; color: var(--text-sub);">DEV-439766</span>
-            </div>
-            <div class="subscription-badge">
-                <i class="fa-solid fa-shield-halved"></i> متبقي <b id="daysLeft">--</b> يوم
-            </div>
-        </div>
+    <!-- 🎁 قسم إرسال دعوة تجربة التطبيق -->
+    <div class="card">
+        <h3>🎁 إرسال دعوة تجربة التطبيق لعميل جديد</h3>
+        <label>اسم العميل / المحل المرشح للتجربة:</label>
+        <input type="text" id="trialClientName" placeholder="مثال: محلات الأمانة">
 
-        <div class="section-title"><i class="fa-solid fa-gauge-high"></i> الواجهات الأساسية</div>
-        <div class="services-grid">
-            <div class="service-card" onclick="openWorkspace('بيع')">
-                <i class="fa-solid fa-cart-shopping" style="color: #4ade80;"></i>
-                <span>شاشة البيع</span>
-            </div>
-            <div class="service-card" onclick="openWorkspace('جرد')">
-                <i class="fa-solid fa-boxes-stacked" style="color: #38bdf8;"></i>
-                <span>المخزن والجرد</span>
-            </div>
-            <div class="service-card" onclick="openWorkspace('شراء')">
-                <i class="fa-solid fa-bag-shopping" style="color: #f43f5e;"></i>
-                <span>الشراء والتركيدات</span>
-            </div>
-            <div class="service-card" onclick="openWorkspace('شحن')">
-                <i class="fa-solid fa-mobile-screen-button" style="color: #fbbf24;"></i>
-                <span>شحن رصيد</span>
-            </div>
-            <div class="service-card" onclick="openWorkspace('عملاء')">
-                <i class="fa-solid fa-users" style="color: #f472b6;"></i>
-                <span>إدارة العملاء</span>
-            </div>
-            <div class="service-card" onclick="openWorkspace('نقدية')">
-                <i class="fa-solid fa-vault" style="color: #a78bfa;"></i>
-                <span>معاملات نقدية</span>
-            </div>
-        </div>
+        <label>رقم هاتف العميل (اختياري):</label>
+        <input type="text" id="trialClientPhone" placeholder="مثال: 201012345678">
 
-        <div class="section-title"><i class="fa-solid fa-credit-card"></i> المعاملات المتقدمة والربط</div>
-        <div class="services-grid">
-            <div class="service-card" onclick="openWorkspace('فيزا')">
-                <i class="fa-solid fa-credit-card" style="color: #60a5fa;"></i>
-                <span>دفع فيزا</span>
-            </div>
-            <div class="service-card" onclick="openWorkspace('محفظة')">
-                <i class="fa-solid fa-wallet" style="color: #34d399;"></i>
-                <span>محفظة كاش</span>
-            </div>
-            <div class="service-card" onclick="openWorkspace('بنك')">
-                <i class="fa-solid fa-building-columns" style="color: #f87171;"></i>
-                <span>معاملات بنكية</span>
-            </div>
-            <div class="service-card" onclick="openWorkspace('فوري')">
-                <i class="fa-solid fa-network-wired" style="color: #facc15;"></i>
-                <span>شبكة فوري</span>
-            </div>
-        </div>
+        <label>مدة الفترة التجريبية (بالأيام):</label>
+        <input type="number" id="trialDays" value="3">
 
-        <!-- منطقة إدخال وتجربة البيانات الحقيقية -->
-        <div id="workspace" class="workspace">
-            <div class="workspace-header">
-                <h3 id="workspaceTitle" style="color: var(--accent-gold);">عنوان الواجهة</h3>
-                <button class="close-btn" onclick="closeWorkspace()">إغلاق <i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div id="workspaceBody"></div>
+        <div class="flex-group">
+            <button class="btn btn-purple" onclick="sendTrialWhatsApp()">💬 إرسال طلب التجربة عبر واتساب</button>
+            <button class="btn btn-blue" onclick="shareTrialViaMedia()">📲 مشاركة طلب التجربة عبر الوسائط</button>
         </div>
     </div>
 
-    <script>
-        let inventory = JSON.parse(localStorage.getItem('app_inventory')) || [
-            { id: 101, name: "منتج تجريبي 1", price: 50, qty: 20 },
-            { id: 102, name: "منتج تجريبي 2", price: 120, qty: 8 }
-        ];
+    <!-- 1️⃣ نافذة تفعيل وتجديد الاشتراك والتأكيد -->
+    <div class="card" id="activationCard">
+        <h3>🔑 تفعيل / تجديد اشتراك العميل وتخصيص الاسم (Firebase)</h3>
+        <label>كود جهاز العميل (Device ID):</label>
+        <div style="display: flex; gap: 8px;">
+            <input type="text" id="targetDevId" placeholder="مثال: DEV-455618" style="flex: 1;">
+            <button class="btn btn-blue" onclick="generateCode()" style="margin-top:0;">توليد كود</button>
+        </div>
 
-        let salesHistory = JSON.parse(localStorage.getItem('app_sales')) || [];
+        <label>اسم صاحب الاشتراك / العميل:</label>
+        <input type="text" id="clientName" placeholder="مثال: السيد متولي">
 
-        window.onload = function() { checkSubscriptionStatus(); };
+        <label>🏪 اسم النشاط / المحل (يظهر ثابتًا بداخل الشريط الدعائي للعميل):</label>
+        <input type="text" id="storeName" placeholder="مثال: سوبرماركت أولاد علي">
 
-        function checkSubscriptionStatus() {
-            const expiryDateStr = localStorage.getItem('app_expiry_date');
-            if (expiryDateStr) {
-                const expiryDate = new Date(expiryDateStr);
-                const diffDays = Math.ceil((expiryDate - new Date()) / (1000 * 60 * 60 * 24));
-                if (diffDays > 0) { showAppScreen(diffDays); }
-                else { showActivationScreen(); }
-            } else { showActivationScreen(); }
+        <label>رقم هاتف الواتساب:</label>
+        <input type="text" id="clientPhone" placeholder="مثال: 201012345678">
+
+        <label>مدة الاشتراك الجديدة (بالأيام):</label>
+        <input type="number" id="subDays" value="30">
+
+        <label>ملاحظات العميل / سجل التجديد:</label>
+        <input type="text" id="clientNotes" placeholder="مثال: تم تحويل المبلغ عبر فودافون كاش">
+
+        <div class="flex-group">
+            <button class="btn btn-green" onclick="confirmAndActivateClient()">✅ مفتاح تأكيد التفعيل وتحديث بيانات العميل</button>
+            <button class="btn btn-orange" onclick="sendActivationWhatsApp()">💬 إرسال الكود عبر الواتساب</button>
+            <button class="btn btn-red" onclick="deactivateDevice()">🚫 إيقاف / حظر الجهاز</button>
+        </div>
+    </div>
+
+    <!-- 2️⃣ التحكم في الشريط الدعائي العام -->
+    <div class="card">
+        <h3>📢 التحكم في الشريط الدعائي العام (Firebase)</h3>
+        <label>نص الإعلان أو الرسالة الترحيبية لجميع العملاء (يُعرض بجانب اسم محل العميل):</label>
+        <textarea id="promoInput" rows="2" placeholder="أدخل النص الدعائي هنا..."></textarea>
+        <button class="btn btn-purple" onclick="updatePromoText()" style="width: 100%;">🚀 نشر الشريط الدعائي للجميع عبر السيرفر</button>
+    </div>
+
+    <!-- 3️⃣ قائمة العملاء والأجهزة المسجلة مع إمكانية التجديد والحذف -->
+    <div class="card">
+        <h3>📋 قائمة العملاء والأجهزة المسجلة</h3>
+        <button class="btn btn-indigo" onclick="loadRegisteredDevices()" style="width: 100%; margin-bottom: 12px;">🔄 تحديث البيانات من السيرفر</button>
+        <div id="devicesList" style="overflow-x: auto;">جاري جلب البيانات...</div>
+    </div>
+
+    <!-- 4️⃣ سجل تعاملات عميل محدد -->
+    <div class="card" id="historyCard" style="display: none;">
+        <h3 id="historyTitle">📜 سجل تعاملات العميل</h3>
+        <div id="historyContent" class="history-box"></div>
+    </div>
+
+    <!-- 5️⃣ روابط الدعم والجروبات -->
+    <div class="card">
+        <h3>🔗 روابط الدعم والجروبات الرسمية</h3>
+        <label>رابط جروب الواتساب للعملاء:</label>
+        <input type="text" id="whatsappGroupUrl" placeholder="https://chat.whatsapp.com/...">
+
+        <label>رابط صفحة أو جروب الماسنجر:</label>
+        <input type="text" id="messengerGroupUrl" placeholder="https://m.me/...">
+
+        <div class="flex-group">
+            <button class="btn btn-green" onclick="saveGroupLinks()">💾 حفظ الروابط</button>
+            <button class="btn btn-purple" onclick="shareGroupInvitation()">📤 إرسال دعوة الجروب عبر الوسائط</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const FIREBASE_DB_URL = "https://pos-system-f3265-default-rtdb.firebaseio.com";
+    let loadedDevicesData = {};
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCurrentPromoText();
+        loadRegisteredDevices();
+        if(localStorage.getItem('link_wa_group')) document.getElementById('whatsappGroupUrl').value = localStorage.getItem('link_wa_group');
+        if(localStorage.getItem('link_ms_group')) document.getElementById('messengerGroupUrl').value = localStorage.getItem('link_ms_group');
+    });
+
+    function generateCode() {
+        const randomNum = Math.floor(100000 + Math.random() * 900000);
+        document.getElementById('targetDevId').value = 'DEV-' + randomNum;
+    }
+
+    async function loadCurrentPromoText() {
+        try {
+            const res = await fetch(`${FIREBASE_DB_URL}/settings/promoText.json`);
+            const text = await res.json();
+            if (text) document.getElementById('promoInput').value = text;
+        } catch (e) {}
+    }
+
+    async function updatePromoText() {
+        const text = document.getElementById('promoInput').value.trim();
+        if (!text) return alert('⚠️ أدخل نص الإعلان أولاً!');
+        try {
+            await fetch(`${FIREBASE_DB_URL}/settings/promoText.json`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(text)
+            });
+            alert('✅ تم نشر الشريط الدعائي العام بنجاح!');
+        } catch (e) {
+            alert('❌ خطأ في الاتصال: ' + e.message);
+        }
+    }
+
+    // --- تأكيد وتفعيل الاشتراك للعميل وتخصيص اسم نشاطه ---
+    async function confirmAndActivateClient() {
+        const devId = document.getElementById('targetDevId').value.trim();
+        const clientName = document.getElementById('clientName').value.trim();
+        const storeName = document.getElementById('storeName').value.trim();
+        const clientPhone = document.getElementById('clientPhone').value.trim();
+        const days = parseInt(document.getElementById('subDays').value) || 30;
+        const notes = document.getElementById('clientNotes').value.trim();
+
+        if (!devId) return alert('⚠️ يرجى إدخال كود جهاز العميل (Device ID)!');
+
+        const now = new Date();
+        const expireDate = now.getTime() + (days * 86400000);
+        const dateStr = now.toLocaleDateString('ar-EG');
+
+        // جلب البيانات القديمة للسجل إذا كان العميل موجوداً
+        let firstActive = dateStr;
+        let logs = [];
+        if (loadedDevicesData[devId]) {
+            firstActive = loadedDevicesData[devId].firstActive || dateStr;
+            logs = loadedDevicesData[devId].logs || [];
         }
 
-        function validateKey() {
-            const key = document.getElementById('licenseInput').value.trim();
-            let durationDays = 0;
-            if (key === "KEY-30DAYS-439766") durationDays = 30;
-            else if (key === "KEY-365DAYS-439766") durationDays = 365;
-            else if (key === "123") durationDays = 3650;
+        logs.push({
+            date: dateStr,
+            days: days,
+            notes: notes || 'تجديد/تفعيل اشتراك وتحديث اسم المحل'
+        });
 
-            if (durationDays > 0) {
-                let expiryDate = new Date();
-                expiryDate.setDate(expiryDate.getDate() + durationDays);
-                localStorage.setItem('app_expiry_date', expiryDate.toISOString());
-                showAppScreen(durationDays);
-            } else {
-                document.getElementById('activationStatus').innerText = "كود التفعيل غير صالح!";
-                document.getElementById('activationStatus').style.color = "#ef4444";
+        const payload = {
+            active: true,
+            clientName: clientName || 'عميل غير مسمى',
+            storeName: storeName || clientName || 'محل تجاري',
+            phone: clientPhone || '',
+            expireDate: expireDate,
+            firstActive: firstActive,
+            lastRenewal: dateStr,
+            notes: notes,
+            logs: logs
+        };
+
+        try {
+            await fetch(`${FIREBASE_DB_URL}/devices/${devId}.json`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            alert(`✅ تم التفعيل وتحديث بيانات العميل بنجاح!\nالعميل: ${clientName || devId}\nاسم المحل: ${storeName || 'غير مخصص'}\nالمدة: ${days} يوم.`);
+            document.getElementById('clientNotes').value = '';
+            loadRegisteredDevices();
+        } catch (e) {
+            alert('❌ خطأ أثناء التفعيل: ' + e.message);
+        }
+    }
+
+    // --- حذف العميل نهائياً لتفريغ المساحة ---
+    async function deleteClient(devId) {
+        if (confirm(`⚠️ هل أنت متأكد من حذف العميل صاحب الكود (${devId}) نهائياً لتفريغ مساحة القائمة؟`)) {
+            try {
+                await fetch(`${FIREBASE_DB_URL}/devices/${devId}.json`, {
+                    method: 'DELETE'
+                });
+                alert(`🗑️ تم حذف العميل وتفريغ المساحة بنجاح!`);
+                loadRegisteredDevices();
+            } catch (e) {
+                alert('❌ خطأ أثناء الحذف: ' + e.message);
             }
         }
+    }
 
-        function showAppScreen(days) {
-            document.getElementById('activationScreen').style.display = 'none';
-            document.getElementById('appDashboard').style.display = 'block';
-            document.getElementById('daysLeft').innerText = days;
-        }
+    // --- إيقاف / حظر الجهاز ---
+    async function deactivateDevice() {
+        const devId = document.getElementById('targetDevId').value.trim();
+        if (!devId) return alert('⚠️ أدخل كود الجهاز أولاً!');
 
-        function showActivationScreen() {
-            document.getElementById('activationScreen').style.display = 'block';
-            document.getElementById('appDashboard').style.display = 'none';
-        }
-
-        function openWorkspace(type) {
-            const ws = document.getElementById('workspace');
-            const title = document.getElementById('workspaceTitle');
-            const body = document.getElementById('workspaceBody');
-
-            ws.style.display = 'block';
-            ws.scrollIntoView({ behavior: 'smooth' });
-
-            if (type === 'بيع') {
-                title.innerText = "🛒 شاشة إدخال المبيعات";
-                body.innerHTML = `
-                    <label>اختر المنتج:</label>
-                    <select id="sellProdSelect">
-                        ${inventory.map(i => `<option value="${i.id}">${i.name} - المتبقي: (${i.qty}) - السعر: ${i.price} ج.م</option>`).join('')}
-                    </select>
-                    <label>الكمية المباعة:</label>
-                    <input type="number" id="sellQty" class="input-field" value="1">
-                    <button class="btn-action" onclick="executeSale()">إتمام البيع واستخراج الفاتورة</button>
-                    
-                    <h4 style="color: var(--accent-gold); margin-top: 15px;">سجل المبيعات الأخيرة</h4>
-                    <table>
-                        <tr><th>المنتج</th><th>الكمية</th><th>الإجمالي</th></tr>
-                        ${salesHistory.map(s => `<tr><td>${s.name}</td><td>${s.qty}</td><td>${s.total} ج.م</td></tr>`).join('')}
-                    </table>
-                `;
-            } else if (type === 'جرد') {
-                title.innerText = "📦 إدارة الجرد والمنتجات";
-                body.innerHTML = `
-                    <h4 style="color: var(--accent-blue); margin-bottom: 8px;">إضافة صنف جديد للمخزن</h4>
-                    <input type="text" id="newProdName" class="input-field" placeholder="اسم المنتج">
-                    <input type="number" id="newProdPrice" class="input-field" placeholder="سعر البيع">
-                    <input type="number" id="newProdQty" class="input-field" placeholder="الكمية الأولى">
-                    <button class="btn-action" style="background: var(--accent-blue);" onclick="addProduct()">حفظ المنتج في الجرد</button>
-                    
-                    <h4 style="color: var(--accent-gold); margin: 15px 0 8px;">جدول جرد المخزن الحالي</h4>
-                    <table>
-                        <tr><th>الكود</th><th>المنتج</th><th>الكمية</th><th>السعر</th></tr>
-                        ${inventory.map(i => `<tr><td>${i.id}</td><td>${i.name}</td><td>${i.qty}</td><td>${i.price} ج.م</td></tr>`).join('')}
-                    </table>
-                `;
-            } else {
-                title.innerText = "⚡ قسم: " + type;
-                body.innerHTML = `
-                    <p style="margin-bottom: 10px;">إدخال حركة جديدة في قسم <b>${type}</b>:</p>
-                    <input type="text" id="actionName" class="input-field" placeholder="اسم العميل / الجهة / المورد">
-                    <input type="number" id="actionAmount" class="input-field" placeholder="المبلغ">
-                    <textarea id="actionNote" class="input-field" placeholder="ملاحظات تفصيلية"></textarea>
-                    <button class="btn-action" onclick="saveGeneralAction('${type}')">حفظ وإثبات العملية</button>
-                `;
+        if (confirm(`هل أنت متأكد من إيقاف/حظر الجهاز (${devId})؟`)) {
+            try {
+                await fetch(`${FIREBASE_DB_URL}/devices/${devId}.json`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ active: false })
+                });
+                alert(`✅ تم إيقاف الجهاز (${devId}) بنجاح!`);
+                loadRegisteredDevices();
+            } catch (e) {
+                alert('❌ خطأ أثناء الإيقاف: ' + e.message);
             }
         }
+    }
 
-        function addProduct() {
-            const name = document.getElementById('newProdName').value;
-            const price = parseFloat(document.getElementById('newProdPrice').value);
-            const qty = parseInt(document.getElementById('newProdQty').value);
+    // --- جلب وإظهار قائمة العملاء في الجدول ---
+    async function loadRegisteredDevices() {
+        const container = document.getElementById('devicesList');
+        container.innerHTML = 'جاري التحميل...';
 
-            if (name && price && qty) {
-                inventory.push({ id: Math.floor(100 + Math.random() * 900), name, price, qty });
-                localStorage.setItem('app_inventory', JSON.stringify(inventory));
-                alert("تم إضافة المنتج للمخزن بنجاح!");
-                openWorkspace('جرد');
-            } else { alert("يرجى إدخال جميع الحقول بشكل صحيح!"); }
-        }
+        try {
+            const res = await fetch(`${FIREBASE_DB_URL}/devices.json`);
+            const data = await res.json();
+            loadedDevicesData = data || {};
 
-        function executeSale() {
-            const prodId = parseInt(document.getElementById('sellProdSelect').value);
-            const qty = parseInt(document.getElementById('sellQty').value);
-            const item = inventory.find(i => i.id === prodId);
-
-            if (item && item.qty >= qty) {
-                item.qty -= qty;
-                const total = item.price * qty;
-                salesHistory.push({ name: item.name, qty, total, date: new Date().toLocaleTimeString('ar-EG') });
-                
-                localStorage.setItem('app_inventory', JSON.stringify(inventory));
-                localStorage.setItem('app_sales', JSON.stringify(salesHistory));
-                
-                alert(`تم إتمام العملية بنجاح! الإجمالي: ${total} ج.م`);
-                openWorkspace('بيع');
-            } else {
-                alert("الكمية المطلوبة غير متوفرة في المخزن!");
+            if (!data) {
+                container.innerHTML = '<p style="text-align:center; padding:10px;">لا يوجد عملاء مسجلين حالياً على السيرفر.</p>';
+                return;
             }
-        }
 
-        function saveGeneralAction(type) {
-            const name = document.getElementById('actionName').value;
-            const amount = document.getElementById('actionAmount').value;
-            if (name && amount) {
-                alert(`تم تسجيل عملية (${type}) بمبلغ ${amount} ج.م بنجاح!`);
-                closeWorkspace();
-            } else { alert("يرجى إدخال البيانات المطلوبة!"); }
-        }
+            let html = '<table><thead><tr><th>كود الجهاز</th><th>اسم العميل</th><th>اسم المحل/النشاط</th><th>الهاتف</th><th>الحالة</th><th>الأيام</th><th>التحكم والإجراءات</th></tr></thead><tbody>';
+            const now = new Date().getTime();
 
-        function closeWorkspace() { document.getElementById('workspace').style.display = 'none'; }
-    </script>
+            for (let devId in data) {
+                const dev = data[devId];
+                const isActive = dev.active;
+                const diff = (dev.expireDate || 0) - now;
+                const remainingDays = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+
+                let statusBadge = isActive && remainingDays > 0 
+                    ? '<span class="badge badge-active">🟢 مفعل</span>' 
+                    : '<span class="badge badge-disabled">🔴 معطل / منتهي</span>';
+
+                html += `<tr>
+                    <td><code>${devId}</code></td>
+                    <td><b>${dev.clientName || '-'}</b></td>
+                    <td><span style="color:#38bdf8; font-weight:bold;">${dev.storeName || dev.clientName || '-'}</span></td>
+                    <td>${dev.phone || '-'}</td>
+                    <td>${statusBadge}</td>
+                    <td>${remainingDays} يوم</td>
+                    <td>
+                        <button class="btn btn-green" style="padding:4px 8px; font-size:11px;" onclick="prepareRenewal('${devId}')">🔄 تجديد/تعديل</button>
+                        <button class="btn btn-purple" style="padding:4px 8px; font-size:11px;" onclick="showHistory('${devId}')">📜 السجل</button>
+                        <button class="btn btn-red" style="padding:4px 8px; font-size:11px;" onclick="deleteClient('${devId}')">🗑️ حذف</button>
+                    </td>
+                </tr>`;
+            }
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        } catch (e) {
+            container.innerHTML = '<p style="color:#ef4444; text-align:center;">❌ فشل جلب البيانات من السيرفر.</p>';
+        }
+    }
+
+    // --- الاستجابة لطلب تجديد الاشتراك واظهار البيانات للتحكم ---
+    function prepareRenewal(devId) {
+        const dev = loadedDevicesData[devId];
+        if (!dev) return;
+
+        document.getElementById('targetDevId').value = devId;
+        document.getElementById('clientName').value = dev.clientName || '';
+        document.getElementById('storeName').value = dev.storeName || dev.clientName || '';
+        document.getElementById('clientPhone').value = dev.phone || '';
+        document.getElementById('clientNotes').value = dev.notes || '';
+
+        document.getElementById('activationCard').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- عرض سجل تعاملات العميل والملاحظات ---
+    function showHistory(devId) {
+        const dev = loadedDevicesData[devId];
+        if (!dev) return;
+
+        const historyCard = document.getElementById('historyCard');
+        const historyTitle = document.getElementById('historyTitle');
+        const historyContent = document.getElementById('historyContent');
+
+        historyTitle.innerText = `📜 سجل تعاملات العميل: ${dev.clientName || devId}`;
+        
+        let html = `<p><b>اسم النشاط/المحل:</b> ${dev.storeName || 'غير مخصص'}</p>`;
+        html += `<p><b>تاريخ أول تعامل:</b> ${dev.firstActive || 'غير محدد'}</p>`;
+        html += `<p><b>رقم الهاتف:</b> ${dev.phone || 'غير مدخل'}</p>`;
+        html += `<p><b>آخر ملاحظة:</b> ${dev.notes || 'لا يوجد'}</p><hr style="border-color:#334155;">`;
+        
+        html += `<b>سجل التجديدات والتعديلات السابقة:</b><ul>`;
+        if (dev.logs && dev.logs.length > 0) {
+            dev.logs.forEach(log => {
+                html += `<li>التاريخ: <b>${log.date}</b> | المدة: <b>${log.days} يوم</b> | التفاصيل: ${log.notes}</li>`;
+            });
+        } else {
+            html += `<li>لا يوجد سجل تجديدات سابق.</li>`;
+        }
+        html += `</ul>`;
+
+        historyContent.innerHTML = html;
+        historyCard.style.display = 'block';
+        historyCard.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function sendActivationWhatsApp() {
+        const phone = document.getElementById('clientPhone').value;
+        const devId = document.getElementById('targetDevId').value;
+        const days = document.getElementById('subDays').value;
+        const storeName = document.getElementById('storeName').value;
+
+        if (!phone || !devId) { alert("⚠️ يرجى إدخال رقم الهاتف وكود الجهاز!"); return; }
+
+        const msg = encodeURIComponent(`مرحباً بك! 🌹\nتم تفعيل/تجديد حسابك بنجاح على النظام المحاسبي.\n🏪 اسم النشاط: ${storeName || 'مفعل'}\n🔑 كود التفعيل الخاص بك: ${devId}\n⏳ مدة الاشتراك: ${days} يوم.`);
+        window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+    }
+
+    function generateTrialMessage() {
+        const name = document.getElementById('trialClientName').value || "عزيزنا العميل";
+        const days = document.getElementById('trialDays').value || "3";
+        const trialCode = "TRIAL-" + Math.floor(1000 + Math.random() * 9000);
+        return `أهلاً بك أ/ ${name} 💐\nندعوك لتجربة تطبيقنا المحاسبي مجاناً لمدة (${days}) أيام!\n\n🔑 كود التجربة المجاني: ${trialCode}\n📲 يمكنك البدء فوراً وتجربة كافة المميزات.`;
+    }
+
+    function sendTrialWhatsApp() {
+        const phone = document.getElementById('trialClientPhone').value;
+        const text = generateTrialMessage();
+        if (!phone) { alert("⚠️ يرجى إدخال رقم هاتف العميل!"); return; }
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function shareTrialViaMedia() {
+        const text = generateTrialMessage();
+        if (navigator.share) {
+            navigator.share({ title: 'دعوة لتجربة التطبيق المحاسبي', text: text }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(text);
+            alert("📋 تم نسخ نص الدعوة التجريبية!");
+        }
+    }
+
+    function saveGroupLinks() {
+        const wa = document.getElementById('whatsappGroupUrl').value;
+        const ms = document.getElementById('messengerGroupUrl').value;
+        localStorage.setItem('link_wa_group', wa);
+        localStorage.setItem('link_ms_group', ms);
+        alert("💾 تم حفظ روابط المجموعات بنجاح!");
+    }
+
+    function shareGroupInvitation() {
+        const waGroup = document.getElementById('whatsappGroupUrl').value || localStorage.getItem('link_wa_group') || '';
+        const msGroup = document.getElementById('messengerGroupUrl').value || localStorage.getItem('link_ms_group') || '';
+
+        if (!waGroup && !msGroup) { alert("⚠️ يرجى إدخال رابط جروب الواتساب أو الماسنجر أولاً!"); return; }
+
+        let message = `مرحباً بك! 👋\nندعوك للانضمام إلى مجموعة الدعم والتحديثات الخاصة بتطبيقنا المحاسبي:\n\n`;
+        if (waGroup) message += `🟢 جروب الواتساب:\n${waGroup}\n\n`;
+        if (msGroup) message += `🔵 جروب الماسنجر:\n${msGroup}\n\n`;
+
+        if (navigator.share) {
+            navigator.share({ title: 'دعوة للانضمام لمجموعة التطبيق', text: message }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(message);
+            alert("📋 تم نسخ رسالة الدعوة والرابط!");
+        }
+    }
+</script>
+
 </body>
 </html>
